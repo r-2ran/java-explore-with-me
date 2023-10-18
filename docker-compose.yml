@@ -55,6 +55,6 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
-      - POSTGRES_DB=main
+      - POSTGRES_DB=main-db
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root

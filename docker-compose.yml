@@ -30,9 +30,9 @@ services:
       - POSTGRES_DB=stats-db
 
   ewm-service:
-    build: ewm-main
-    image: ewm-main
-    container_name: ewm-main
+    build: ewm-service
+    image: ewm-service
+    container_name: ewm-service
     ports:
       - "8080:8080"
     depends_on:

@@ -46,7 +46,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
 
-  ewm-db:
+  main-db:
     image: postgres:14-alpine
     container_name: main-db
     ports:

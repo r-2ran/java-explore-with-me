@@ -123,7 +123,7 @@
                     </executions>
                     <dependencies>
                         <dependency>
-                            <groupId>ecom.puppycrawl.tools</groupId>
+                            <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
                             <version>10.3</version>
                         </dependency>

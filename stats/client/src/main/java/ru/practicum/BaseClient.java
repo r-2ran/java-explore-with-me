@@ -1,12 +1,13 @@
 package ru.practicum;
 
 import org.springframework.http.*;
-import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
+@Service
 public class BaseClient {
     protected final RestTemplate rest;
 
@@ -18,15 +19,14 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.POST, path, null, body);
     }
 
-    protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
+    protected ResponseEntity<Object> get(String path, Map<String, Object> parameters) {
         return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
     }
 
     private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method,
                                                           String path,
-                                                          @Nullable Map<String, Object> parameters,
-                                                          @Nullable T body) {
-        assert body != null;
+                                                          Map<String, Object> parameters,
+                                                          T body) {
         HttpEntity<T> requestEntity = new HttpEntity<>(body);
 
         ResponseEntity<Object> serverResponse;

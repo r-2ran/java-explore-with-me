@@ -5,10 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.ViewStatsDto;
+import ru.practicum.model.EndpointHit;
+import ru.practicum.model.ViewStats;
 import ru.practicum.repository.EndPointHitRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import static ru.practicum.mapper.EndPointHitMapper.*;
@@ -30,11 +33,21 @@ public class EndPointHitServiceImpl implements EndPointHitService {
     public List<ViewStatsDto> getStats(List<String> uris, boolean isUnique,
                                        String start, String end) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime startTime = LocalDateTime.parse(start, formatter);
-        LocalDateTime endTime = LocalDateTime.parse(end, formatter);
-        if (isUnique) {
-            return toDtos(repository.getStatsUnique(uris, startTime, endTime));
-        } else
-            return toDtos(repository.getStats(uris, startTime, endTime));
+        LocalDateTime startDate = LocalDateTime.parse(start, formatter);
+        LocalDateTime endDate = LocalDateTime.parse(end, formatter);
+        List<EndpointHit> hits = repository.findAllByTimestampBetweenAndUriIn(startDate, endDate, uris);
+        List<ViewStats> viewStats = new ArrayList<>();
+
+        for (EndpointHit hit : hits) {
+            Long hitCount;
+            if (isUnique) {
+                hitCount = repository.findHitCountByUriWithUniqueIp(hit.getUri());
+            } else {
+                hitCount = repository.findHitCountByUri(hit.getUri());
+            }
+            viewStats.add(new ViewStats(hit.getApp(), hit.getUri(), hitCount));
+        }
+        return toDtos(viewStats);
     }
+}
 }

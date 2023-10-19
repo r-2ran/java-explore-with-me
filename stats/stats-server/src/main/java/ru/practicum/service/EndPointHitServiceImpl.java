@@ -54,7 +54,10 @@ public class EndPointHitServiceImpl implements EndPointHitService {
             }
             viewStats.add(new ViewStats(hit.getApp(), hit.getUri(), hitCount));
         }
-        viewStats = viewStats.stream().sorted(Comparator.comparingLong(ViewStats::getHits)).collect(Collectors.toList());
+        viewStats = viewStats
+                .stream()
+                .sorted(Comparator.comparingLong(ViewStats::getHits).reversed())
+                .collect(Collectors.toList());
         return toDtos(viewStats);
     }
 }

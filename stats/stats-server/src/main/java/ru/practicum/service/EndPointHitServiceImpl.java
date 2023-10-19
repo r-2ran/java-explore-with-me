@@ -53,8 +53,6 @@ public class EndPointHitServiceImpl implements EndPointHitService {
             }
         } else {
             hits = repository.findAllByTimestampBetweenAndUriIn(startDate, endDate, uris);
-
-
             for (EndpointHit hit : hits) {
                 Long hitCount;
                 if (isUnique) {

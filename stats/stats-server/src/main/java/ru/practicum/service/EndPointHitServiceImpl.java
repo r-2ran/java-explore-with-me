@@ -11,9 +11,7 @@ import ru.practicum.repository.EndPointHitRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.mapper.EndPointHitMapper.*;
@@ -67,6 +65,13 @@ public class EndPointHitServiceImpl implements EndPointHitService {
                 .stream()
                 .sorted(Comparator.comparingLong(ViewStats::getHits).reversed())
                 .collect(Collectors.toList());
+        for (int i = 0; i < viewStats.size() - 1; i++) {
+            if (viewStats.get(i).getUri().equals(viewStats.get(i + 1).getUri())) {
+                viewStats.get(i + 1).setHits(viewStats.get(i + 1).getHits() +
+                        viewStats.get(i).getHits());
+                viewStats.remove(i);
+            }
+        }
         return toDtos(viewStats);
     }
 }

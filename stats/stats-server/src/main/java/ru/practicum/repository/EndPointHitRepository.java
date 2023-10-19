@@ -16,7 +16,15 @@ public interface EndPointHitRepository extends JpaRepository<EndpointHit, Long> 
             "WHERE uri = ?1")
     Long findHitCountByUri(String uri);
 
+    @Query("SELECT COUNT (ip) FROM EndpointHit " +
+            "GROUP BY uri")
+    Long findHitCount();
+
     @Query("SELECT COUNT (DISTINCT ip) FROM EndpointHit " +
             "WHERE uri = ?1")
     Long findHitCountByUriWithUniqueIp(String uri);
+
+    @Query("SELECT COUNT (DISTINCT ip) FROM EndpointHit " +
+            "GROUP BY uri")
+    Long findHitCountWithUniqueIp();
 }

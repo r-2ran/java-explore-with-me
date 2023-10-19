@@ -37,22 +37,33 @@ public class EndPointHitServiceImpl implements EndPointHitService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime startDate = LocalDateTime.parse(start, formatter);
         LocalDateTime endDate = LocalDateTime.parse(end, formatter);
-        List<EndpointHit> hits = new ArrayList<>();
-        if (uris == null) {
-            hits = repository.findAllByTimestampBetween(startDate, endDate);
-        } else {
-            hits = repository.findAllByTimestampBetweenAndUriIn(startDate, endDate, uris);
-        }
+        List<EndpointHit> hits;
         List<ViewStats> viewStats = new ArrayList<>();
 
-        for (EndpointHit hit : hits) {
-            Long hitCount;
-            if (isUnique) {
-                hitCount = repository.findHitCountByUriWithUniqueIp(hit.getUri());
-            } else {
-                hitCount = repository.findHitCountByUri(hit.getUri());
+        if (uris == null) {
+            hits = repository.findAllByTimestampBetween(startDate, endDate);
+            for (EndpointHit hit : hits) {
+                Long hitCount;
+                if (isUnique) {
+                    hitCount = repository.findHitCountWithUniqueIp();
+                } else {
+                    hitCount = repository.findHitCount();
+                }
+                viewStats.add(new ViewStats(hit.getApp(), hit.getUri(), hitCount));
             }
-            viewStats.add(new ViewStats(hit.getApp(), hit.getUri(), hitCount));
+        } else {
+            hits = repository.findAllByTimestampBetweenAndUriIn(startDate, endDate, uris);
+
+
+            for (EndpointHit hit : hits) {
+                Long hitCount;
+                if (isUnique) {
+                    hitCount = repository.findHitCountByUriWithUniqueIp(hit.getUri());
+                } else {
+                    hitCount = repository.findHitCountByUri(hit.getUri());
+                }
+                viewStats.add(new ViewStats(hit.getApp(), hit.getUri(), hitCount));
+            }
         }
         viewStats = viewStats
                 .stream()

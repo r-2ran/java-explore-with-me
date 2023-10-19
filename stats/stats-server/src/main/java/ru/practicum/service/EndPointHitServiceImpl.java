@@ -65,11 +65,13 @@ public class EndPointHitServiceImpl implements EndPointHitService {
                 .stream()
                 .sorted(Comparator.comparingLong(ViewStats::getHits).reversed())
                 .collect(Collectors.toList());
-        for (int i = 0; i < viewStats.size() - 1; i++) {
-            if (viewStats.get(i).getUri().equals(viewStats.get(i + 1).getUri())) {
-                viewStats.get(i + 1).setHits(viewStats.get(i + 1).getHits() +
-                        viewStats.get(i).getHits());
-                viewStats.remove(i);
+        if (uris == null) {
+            for (int i = 0; i < viewStats.size() - 1; i++) {
+                if (viewStats.get(i).getUri().equals(viewStats.get(i + 1).getUri())) {
+                    viewStats.get(i + 1).setHits(viewStats.get(i + 1).getHits() +
+                            viewStats.get(i).getHits());
+                    viewStats.remove(i);
+                }
             }
         }
         return toDtos(viewStats);

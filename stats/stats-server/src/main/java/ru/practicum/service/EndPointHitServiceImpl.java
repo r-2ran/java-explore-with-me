@@ -65,7 +65,7 @@ public class EndPointHitServiceImpl implements EndPointHitService {
                 .stream()
                 .sorted(Comparator.comparingLong(ViewStats::getHits).reversed())
                 .collect(Collectors.toList());
-        if (uris == null) {
+        if (!isUnique) {
             for (int i = 0; i < viewStats.size() - 1; i++) {
                 if (viewStats.get(i).getUri().equals(viewStats.get(i + 1).getUri())) {
                     viewStats.get(i + 1).setHits(viewStats.get(i + 1).getHits() +

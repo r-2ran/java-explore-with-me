@@ -50,4 +50,3 @@ public class EndPointHitServiceImpl implements EndPointHitService {
         return toDtos(viewStats);
     }
 }
-}

@@ -6,19 +6,19 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.ViewStatsDto;
 import ru.practicum.model.ViewStats;
-import ru.practicum.repository.EndPointHitRepository;
+import ru.practicum.repository.EndpointHitRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static ru.practicum.mapper.EndPointHitMapper.*;
+import static ru.practicum.mapper.EndpointHitMapper.*;
 import static ru.practicum.mapper.ViewStatsMapper.*;
 
 @Service
 @AllArgsConstructor
-public class EndPointHitServiceImpl implements EndPointHitService {
-    private final EndPointHitRepository repository;
+public class EndpointHitServiceImpl implements EndpointHitService {
+    private final EndpointHitRepository repository;
 
     @Override
     @Transactional

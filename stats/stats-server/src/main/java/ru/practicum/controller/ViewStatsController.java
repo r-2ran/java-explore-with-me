@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ViewStatsDto;
-import ru.practicum.service.EndPointHitService;
+import ru.practicum.service.EndpointHitService;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @RequestMapping(path = "/stats")
 public class ViewStatsController {
-    private final EndPointHitService service;
+    private final EndpointHitService service;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)

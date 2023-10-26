@@ -11,6 +11,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Entity
+@Table(name = "compilations")
 public class Compilation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

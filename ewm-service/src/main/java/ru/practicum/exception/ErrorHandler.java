@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static ru.practicum.event.mapper.EventMapper.FORMATTER;
@@ -53,6 +54,17 @@ public class ErrorHandler {
                 List.of(e),
                 e.getMessage(),
                 "you don't have access to these object or data",
+                "FORBIDDEN",
+                LocalDateTime.now().format(FORMATTER));
+    }
+
+    @ExceptionHandler(Throwable.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiError handleInternalServerError(final Throwable e) {
+        return new ApiError(
+                new ArrayList<>(),
+                e.getMessage(),
+                "server error",
                 "FORBIDDEN",
                 LocalDateTime.now().format(FORMATTER));
     }

@@ -7,6 +7,7 @@ import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.AccessDeniedException;
 import ru.practicum.exception.AlreadyExistException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.ValidationException;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
@@ -32,6 +33,9 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
+        if (eventId == null) {
+            throw new ValidationException("bad param eventId");
+        }
         Request request = new Request();
         request.setRequester(checkUser(userId));
         request.setEvent(checkEvent(eventId));

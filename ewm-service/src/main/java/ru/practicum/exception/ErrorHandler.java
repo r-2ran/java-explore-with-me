@@ -1,6 +1,7 @@
 package ru.practicum.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -65,7 +66,19 @@ public class ErrorHandler {
                 new ArrayList<>(),
                 e.getMessage(),
                 "server error",
-                "FORBIDDEN",
+                "INTERNAL_SERVER_ERROR",
+                LocalDateTime.now().format(FORMATTER));
+    }
+
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
+        return new ApiError(
+                new ArrayList<>(),
+                e.getMessage(),
+                "validation error",
+                "BAD_REQUEST",
                 LocalDateTime.now().format(FORMATTER));
     }
 }

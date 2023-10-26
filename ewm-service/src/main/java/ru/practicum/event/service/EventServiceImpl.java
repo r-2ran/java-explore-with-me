@@ -4,12 +4,16 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.practicum.category.model.Category;
 import ru.practicum.category.service.CategoryService;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.AccessDeniedException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.ValidationException;
+import ru.practicum.location.model.Location;
+import ru.practicum.location.service.LocationService;
 import ru.practicum.state.State;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
@@ -23,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static ru.practicum.event.mapper.EventMapper.*;
 import static ru.practicum.category.mapper.CategoryMapper.*;
+import static ru.practicum.location.mapper.LocationMapper.*;
 
 @Service
 @AllArgsConstructor
@@ -30,16 +35,37 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryService categoryService;
+    private final LocationService locationService;
 
 
     @Override
     public EventFullDto addEvent(Long userId, NewEventDto eventDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("no user id %d", userId)));
+        if (eventDto.getEventDate() != null &&
+                LocalDateTime.parse(eventDto.getEventDate(), FORMATTER)
+                        .isBefore(LocalDateTime.now().plusHours(5))) {
+            throw new ValidationException("wrong event date, it cannot be in past");
+        }
+        Category category = toCategory(categoryService.getCategoryById(eventDto.getCategory()));
+        Location location = locationService.addLocation(toLocationDto(eventDto.getLocation()));
         Event event = to(eventDto);
-        event.setCategory(toCategory(categoryService.getCategoryById(eventDto.getCategory())));
-        event.setPublishedOn(LocalDateTime.now());
-        event.setInitiator(checkUser(userId));
-        event.setConfirmedRequests(0L);
         event.setState(State.PENDING);
+        if (eventDto.getRequestModeration() == null) {
+            event.setRequestModeration(true);
+        } else {
+            event.setRequestModeration(eventDto.getRequestModeration());
+        }
+        if (eventDto.getPaid() == null) {
+            event.setPaid(false);
+        } else {
+            event.setPaid(eventDto.getPaid());
+        }
+        if (eventDto.getParticipantLimit() == null) {
+            event.setParticipantLimit(0);
+        } else {
+            event.setParticipantLimit(eventDto.getParticipantLimit());
+        }
         return toFull(eventRepository.save(event));
     }
 

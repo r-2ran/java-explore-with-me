@@ -28,7 +28,7 @@ public class PrivateEventController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto addEvent(@PathVariable Long userId,
-                                 @RequestBody @Valid NewEventDto eventDto) {
+                                 @Valid @RequestBody NewEventDto eventDto) {
         return eventService.addEvent(userId, eventDto);
     }
 
@@ -52,7 +52,7 @@ public class PrivateEventController {
     @PatchMapping("/{eventId}")
     public EventFullDto changeEventByUser(@PathVariable Long userId,
                                           @PathVariable Long eventId,
-                                          @RequestBody @Valid UpdateEventUserRequest eventUserRequest) {
+                                          @Valid @RequestBody UpdateEventUserRequest eventUserRequest) {
         return eventService.updateEventByUser(userId, eventId, eventUserRequest);
     }
 

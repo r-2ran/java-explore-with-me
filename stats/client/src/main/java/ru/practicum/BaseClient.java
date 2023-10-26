@@ -10,7 +10,7 @@ import java.util.Map;
 
 @Service
 public class BaseClient {
-    protected final RestTemplate rest;
+    public final RestTemplate rest;
 
     public BaseClient(RestTemplate rest) {
         this.rest = rest;

@@ -1,5 +1,7 @@
 package ru.practicum;
 
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -9,12 +11,9 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 @Service
+@AllArgsConstructor
 public class BaseClient {
     public final RestTemplate rest;
-
-    public BaseClient(RestTemplate rest) {
-        this.rest = rest;
-    }
 
     protected <T> ResponseEntity<Object> post(String path, T body) {
         return makeAndSendRequest(HttpMethod.POST, path, null, body);

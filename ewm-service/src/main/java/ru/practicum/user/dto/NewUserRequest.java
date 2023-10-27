@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.*;
 
@@ -15,9 +16,9 @@ import javax.validation.constraints.*;
 public class NewUserRequest {
     @Email
     @NotBlank
-    @Size(min = 6, max = 254)
+    @Length(min = 6, max = 254)
     String email;
-    @Size(min = 2, max = 250)
+    @Length(min = 2, max = 250)
     @NotBlank
     String name;
 

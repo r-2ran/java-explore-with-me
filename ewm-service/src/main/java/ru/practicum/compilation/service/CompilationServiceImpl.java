@@ -14,6 +14,7 @@ import ru.practicum.exception.NotFoundException;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import static ru.practicum.compilation.CompilationMapper.*;
 
@@ -57,7 +58,7 @@ public class CompilationServiceImpl implements CompilationService {
     public List<CompilationDto> getAll(Boolean pinned, int from, int size) {
         from = from / size;
         Pageable pageable = PageRequest.of(from, size);
-        if (pinned == null) {
+        if (Objects.equals(pinned, null)) {
             return toDtoList(compilationRepository.findAll(pageable).getContent());
         }
         return toDtoList(compilationRepository.findAllByPinned(pinned, pageable).getContent());

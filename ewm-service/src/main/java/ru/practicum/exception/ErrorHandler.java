@@ -81,4 +81,14 @@ public class ErrorHandler {
                 "BAD_REQUEST",
                 LocalDateTime.now().format(FORMATTER));
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleValidationException(final javax.validation.ValidationException e) {
+        return new ApiError(new ArrayList<>(),
+                e.getMessage(),
+                "validation error",
+                "BAD_REQUEST",
+                LocalDateTime.now().format(FORMATTER));
+    }
 }

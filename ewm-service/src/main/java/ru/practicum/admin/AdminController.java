@@ -24,7 +24,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/admin")
+@RequestMapping(path = "/admin")
 public class AdminController {
     private final AdminService adminService;
 
@@ -47,12 +47,12 @@ public class AdminController {
     }
 
     @GetMapping("/events")
-    public List<EventFullDto> getAllEvents(@RequestParam(value = "users", required = false) List<Long> users,
-                                           @RequestParam(value = "states", required = false) List<State> states,
-                                           @RequestParam(value = "categories", required = false) List<Long> categories,
-                                           @RequestParam(value = "rangeStart", required = false)
+    public List<EventFullDto> getAllEvents(@RequestParam(required = false) List<Long> users,
+                                           @RequestParam(required = false) List<State> states,
+                                           @RequestParam(required = false) List<Long> categories,
+                                           @RequestParam(required = false)
                                            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
-                                           @RequestParam(value = "rangeEnd", required = false)
+                                           @RequestParam(required = false)
                                            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                            @PositiveOrZero
                                            @RequestParam(value = "from", defaultValue = "0", required = false)
@@ -72,7 +72,7 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public List<UserDto> getAllUsers(@RequestParam(value = "ids") List<Long> ids,
+    public List<UserDto> getAllUsers(@RequestParam(value = "ids", required = false) List<Long> ids,
                                      @PositiveOrZero
                                      @RequestParam(value = "from", required = false, defaultValue = "0")
                                      Integer from,
@@ -84,7 +84,7 @@ public class AdminController {
 
     @PostMapping("/users")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public UserDto addUser(@Valid @RequestBody NewUserRequest newUserRequest) {
+    public UserDto addUser(@Valid NewUserRequest newUserRequest) {
         return adminService.addUser(newUserRequest);
     }
 

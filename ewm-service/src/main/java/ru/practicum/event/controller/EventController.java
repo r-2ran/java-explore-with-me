@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/events")
+@RequestMapping(path = "/events")
 public class EventController {
     private final EventService eventService;
 
@@ -24,8 +24,8 @@ public class EventController {
                                    @RequestParam(required = false) Boolean paid,
                                    @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
                                    @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-                                   @RequestParam(defaultValue = "false") Boolean onlyAvailable,
-                                   @RequestParam(required = false) SortState  sort,
+                                   @RequestParam(required = false) Boolean onlyAvailable,
+                                   @RequestParam(required = false) SortState sort,
                                    @RequestParam(required = false, defaultValue = "0") int from,
                                    @RequestParam(required = false, defaultValue = "10") int size,
                                    HttpServletRequest request) {

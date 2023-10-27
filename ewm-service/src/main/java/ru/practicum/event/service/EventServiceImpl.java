@@ -14,7 +14,6 @@ import ru.practicum.event.dto.*;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.AccessDeniedException;
-import ru.practicum.exception.ConflictRequestParamException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.location.model.Location;
@@ -55,7 +54,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto addEventUser(Long userId, NewEventDto eventDto) {
 
         if (LocalDateTime.parse(eventDto.getEventDate(), FORMATTER).isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ConflictRequestParamException("error date, event cannot be in past");
+            throw new ValidationException("error date, event cannot be in past");
         }
         Event event = Event.builder()
                 .annotation(eventDto.getAnnotation())

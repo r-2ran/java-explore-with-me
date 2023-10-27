@@ -13,7 +13,7 @@ import java.util.List;
 
 @Service
 public interface EventService {
-    EventFullDto addEventUser(Long userId, NewEventDto dto);
+    EventFullDto addEventUser(Long userId, NewEventDto newEventDto);
 
     List<EventShortDto> getEventByUserId(Long userId, int from, int size);
 

@@ -11,7 +11,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/compilations")
+@RequestMapping(path = "/compilations")
 public class CompilationController {
     private final CompilationService compilationService;
 

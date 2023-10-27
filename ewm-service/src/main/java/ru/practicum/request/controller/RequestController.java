@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/users/{userId}/requests")
+@RequestMapping(path = "/users/{userId}/requests")
 public class RequestController {
     private final RequestService requestService;
 

@@ -32,7 +32,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (compilationDto.getEvents() == null) {
             compilation.setEvents(new HashSet<>());
         } else {
-            compilation.setEvents(eventRepository.findAllByIdsIn(compilationDto.getEvents()));
+            compilation.setEvents(new HashSet<>(eventRepository.findAllByIdsIn(compilationDto.getEvents())));
         }
         return toDto(compilationRepository.save(compilation));
     }
@@ -41,7 +41,7 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto updateCompilation(Long compilationId, UpdateCompilationRequest compilationDto) {
         Compilation compilation = checkCompilation(compilationId);
         if (compilationDto.getEvents() != null) {
-            compilation.setEvents(eventRepository.findAllByIdsIn(compilationDto.getEvents()));
+            compilation.setEvents(new HashSet<>(eventRepository.findAllByIdsIn(compilationDto.getEvents())));
         }
         if (compilationDto.getTitle() != null) {
             compilation.setTitle(compilationDto.getTitle());

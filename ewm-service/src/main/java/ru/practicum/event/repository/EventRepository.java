@@ -19,7 +19,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findAllByCategoryId(Long catId);
 
-    Set<Event> findAllByIdsIn(Set<Long> ids);
+    List<Event> findAllByIdsIn(Set<Long> ids);
 
     @Query("select e from Event e " +
             "where e.initiator.id in ?1 " +

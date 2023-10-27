@@ -17,6 +17,8 @@ import ru.practicum.exception.AccessDeniedException;
 import ru.practicum.exception.ConflictRequestParamException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
+import ru.practicum.location.model.Location;
+import ru.practicum.location.repository.LocationRepository;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.model.Request;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 import static ru.practicum.event.mapper.EventMapper.*;
 import static ru.practicum.category.mapper.CategoryMapper.*;
 import static ru.practicum.request.mapper.RequestMapper.toDto;
+import static ru.practicum.location.mapper.LocationMapper.*;
 
 @Service
 @AllArgsConstructor
@@ -45,6 +48,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final StatsClient client;
     private final RequestRepository requestRepository;
+    private final LocationRepository locationRepository;
 
 
     @Override
@@ -59,7 +63,8 @@ public class EventServiceImpl implements EventService {
                 .title(eventDto.getTitle())
                 .initiator(checkUser(userId))
                 .category(toCategory(categoryService.getCategoryById(eventDto.getCategory())))
-                .location(eventDto.getLocation())
+                .location(locationRepository.findByLonAndLat(eventDto.getLocation().getLon(),
+                        eventDto.getLocation().getLat()).orElse(setLocation(eventDto.getLocation())))
                 .created(LocalDateTime.now())
                 .eventDate(LocalDateTime.parse(eventDto.getEventDate(), FORMATTER))
                 .views(0)
@@ -342,4 +347,7 @@ public class EventServiceImpl implements EventService {
                 LocalDateTime.now()));
     }
 
+    private Location setLocation(Location location) {
+        return locationRepository.save(location);
+    }
 }

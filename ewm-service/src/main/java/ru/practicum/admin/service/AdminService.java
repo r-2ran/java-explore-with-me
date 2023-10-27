@@ -12,6 +12,7 @@ import ru.practicum.state.State;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -26,7 +27,7 @@ public interface AdminService {
     EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest updateEventAdminRequest);
 
     List<EventFullDto> findAllEvents(List<Long> users, List<State> states, List<Long> categories,
-                                     String rangeStart, String rangeEnd, Integer from, Integer size);
+                                     LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size);
 
     CompilationDto addCompilation(NewCompilationDto compilationDto);
 

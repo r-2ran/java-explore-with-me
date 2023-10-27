@@ -17,6 +17,7 @@ import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -49,7 +50,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public List<EventFullDto> findAllEvents(List<Long> users, List<State> states, List<Long> categories,
-                                            String rangeStart, String rangeEnd, Integer from, Integer size) {
+                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
         return eventService.findAllEventsAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 

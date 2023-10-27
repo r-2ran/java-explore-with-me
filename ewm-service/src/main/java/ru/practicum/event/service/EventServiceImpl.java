@@ -17,7 +17,6 @@ import ru.practicum.exception.AccessDeniedException;
 import ru.practicum.exception.ConflictRequestParamException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
-import ru.practicum.location.service.LocationService;
 import ru.practicum.state.SortState;
 import ru.practicum.state.State;
 import ru.practicum.user.model.User;
@@ -37,7 +36,6 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryService categoryService;
-    private final LocationService locationService;
     private final CategoryRepository categoryRepository;
     private final StatsClient client;
 
@@ -53,19 +51,19 @@ public class EventServiceImpl implements EventService {
                 .title(eventDto.getTitle())
                 .initiator(checkUser(userId))
                 .category(toCategory(categoryService.getCategoryById(eventDto.getCategory())))
-                .location(locationService.getByParam(eventDto.getLocation().getLon(), eventDto.getLocation().getLat()))
+                .location(eventDto.getLocation())
                 .created(LocalDateTime.now())
                 .eventDate(LocalDateTime.parse(eventDto.getEventDate(), FORMATTER))
                 .views(0)
                 .state(State.PENDING)
                 .build();
         if (eventDto.getRequestModeration() == null) {
-            event.setRequestModeration(true);
+            event.setRequestModeration(Boolean.TRUE);
         } else {
             event.setRequestModeration(eventDto.getRequestModeration());
         }
         if (eventDto.getPaid() == null) {
-            event.setPaid(false);
+            event.setPaid(Boolean.FALSE);
         } else {
             event.setPaid(eventDto.getPaid());
         }
@@ -102,16 +100,14 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> findAllEvents(String text, List<Long> categories, Boolean paid, String rangeStart,
-                                             String rangeEnd, Boolean onlyAvailable, String sort, int from,
+    public List<EventShortDto> findAllEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
+                                             LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, int from,
                                              int size, HttpServletRequest request) {
         Pageable pageable = PageRequest.of(from / size, size);
-        LocalDateTime start = LocalDateTime.now();
-        if (rangeStart != null) {
-            start = LocalDateTime.parse(rangeStart, FORMATTER);
+        if (rangeStart == null) {
+            rangeStart = LocalDateTime.now();
         }
-        LocalDateTime end = LocalDateTime.parse(rangeEnd, FORMATTER);
-        checkDate(start, end);
+        checkDate(rangeStart, rangeEnd);
         List<Specification<Event>> specifications = new ArrayList<>();
         if (categories != null) {
             List<Category> categoryList = categories.stream()
@@ -122,8 +118,8 @@ public class EventServiceImpl implements EventService {
             specifications.add(categoryIdIn(categoryList));
         }
         specifications.add(paid == null ? null : paidIs(paid));
-        specifications.add(eventDateIsGreaterOrEqual(start));
-        specifications.add(rangeEnd == null ? null : eventDateIsLess(end));
+        specifications.add(eventDateIsGreaterOrEqual(rangeStart));
+        specifications.add(rangeEnd == null ? null : eventDateIsLess(rangeEnd));
         specifications.add(stateIn(List.of(State.PUBLISHED)));
         Specification<Event> specification = specifications.stream()
                 .filter(Objects::nonNull)
@@ -158,10 +154,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventFullDto> findAllEventsAdmin(List<Long> users, List<State> states, List<Long> categories,
-                                                 String rangeStart, String rangeEnd, int from, int size) {
-        LocalDateTime start = LocalDateTime.parse(rangeStart);
-        LocalDateTime end = LocalDateTime.parse(rangeEnd);
-        checkDate(start, end);
+                                                 LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
+        checkDate(rangeStart, rangeEnd);
         Pageable pageable = PageRequest.of(from / size, size);
         List<Specification<Event>> specifications = new ArrayList<>();
         if (users != null) {
@@ -181,8 +175,8 @@ public class EventServiceImpl implements EventService {
             specifications.add(categoryIdIn(categoryList));
         }
         specifications.add(states == null ? null : stateIn(states));
-        specifications.add(start == null ? null : eventDateIsGreaterOrEqual(start));
-        specifications.add(end == null ? null : eventDateIsLess(end));
+        specifications.add(rangeStart == null ? null : eventDateIsGreaterOrEqual(rangeStart));
+        specifications.add(rangeEnd == null ? null : eventDateIsLess(rangeEnd));
         Specification<Event> specification = specifications.stream()
                 .filter(Objects::nonNull)
                 .reduce(Specification::and)

@@ -1,6 +1,7 @@
 package ru.practicum.admin;
 
 import lombok.AllArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.admin.service.AdminService;
@@ -18,6 +19,7 @@ import ru.practicum.user.dto.UserDto;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -48,8 +50,10 @@ public class AdminController {
     public List<EventFullDto> getAllEvents(@RequestParam(value = "users", required = false) List<Long> users,
                                            @RequestParam(value = "states", required = false) List<State> states,
                                            @RequestParam(value = "categories", required = false) List<Long> categories,
-                                           @RequestParam(value = "rangeStart", required = false) String rangeStart,
-                                           @RequestParam(value = "rangeEnd", required = false) String rangeEnd,
+                                           @RequestParam(value = "rangeStart", required = false)
+                                           @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+                                           @RequestParam(value = "rangeEnd", required = false)
+                                           @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                            @PositiveOrZero
                                            @RequestParam(value = "from", defaultValue = "0", required = false)
                                            Integer from,

@@ -6,11 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.category.model.Category;
+import ru.practicum.location.model.Location;
+import ru.practicum.request.model.Request;
 import ru.practicum.state.State;
 import ru.practicum.user.model.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -22,46 +25,48 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @Column
+    @Column(name = "annotation", nullable = false)
     String annotation;
-    @Column
+    @Column(name = "description", nullable = false)
     String description;
-    @Column(name = "confirmed_requests")
-    Long confirmedRequests;
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    Category category;
-    @Column
-    private String title;
-    @Column(name = "published_on")
-    LocalDateTime publishedOn;
-    @Column(name = "event_date")
-    LocalDateTime eventDate;
-    @ManyToOne
-    @JoinColumn(name = "initiator_id")
-    User initiator;
-    @Column
-    Float lat;
-    @Column
-    Float lon;
-    @Column
-    Boolean paid;
-    @Column(name = "participant_limit")
-    Integer participantLimit;
-    @Column(name = "request_moderation")
-    Boolean requestModeration;
-    @Column(name = "state")
+    @Column(name = "title", nullable = false)
+    String title;
+    @Column(name = "state", nullable = false)
     @Enumerated(EnumType.STRING)
     State state;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "initiator_id")
+    User initiator;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    Category category;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id")
+    Location location;
+    @Column(name = "created", nullable = false)
+    LocalDateTime created;
+    @Column(name = "eventDate", nullable = false)
+    LocalDateTime eventDate;
+    @Column(name = "published_on", nullable = false)
+    LocalDateTime publishedOn;
+    @Column(name = "paid", nullable = false)
+    Boolean paid;
+    @Column(name = "request_moderation", nullable = false)
+    Boolean requestModeration;
+    @Column(name = "participant_limit", nullable = false)
+    Integer participantLimit;
+    @OneToMany(mappedBy = "event")
+    List<Request> confirmedRequests;
+    @Column(name = "views", columnDefinition = "int default 0")
+    Integer views;
 
     public Event(String annotation, String description, String title, LocalDateTime eventDate,
-                 Float lat, Float lon, Boolean paid, Integer participantLimit, Boolean requestModeration) {
+                 Location location, Boolean paid, Integer participantLimit, Boolean requestModeration) {
         this.annotation = annotation;
         this.description = description;
         this.title = title;
         this.eventDate = eventDate;
-        this.lat = lat;
-        this.lon = lon;
+        this.location = location;
         this.paid = paid;
         this.participantLimit = participantLimit;
         this.requestModeration = requestModeration;

@@ -27,6 +27,17 @@ public class ErrorHandler {
                 LocalDateTime.now().format(FORMATTER));
     }
 
+    @ExceptionHandler(ConflictRequestParamException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleAlreadyExistsException(final ConflictRequestParamException e) {
+        return new ApiError(
+                List.of(e),
+                e.getMessage(),
+                "this object is already exist in db",
+                "CONFLICT",
+                LocalDateTime.now().format(FORMATTER));
+    }
+
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleNotFoundException(final NotFoundException e) {

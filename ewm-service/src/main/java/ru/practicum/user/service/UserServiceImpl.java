@@ -32,7 +32,11 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getAll(List<Long> ids, Integer from, Integer size) {
         from = from / size;
         Pageable pageable = PageRequest.of(from, size);
-        return userRepository.findByIdIn(ids, pageable);
+        if (ids.isEmpty()) {
+            return toDtoList(userRepository.findAll(pageable).getContent());
+        }
+
+        return toDtoList(userRepository.findByIdIn(ids, pageable));
     }
 
     @Override

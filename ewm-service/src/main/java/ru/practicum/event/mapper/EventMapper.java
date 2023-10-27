@@ -4,7 +4,6 @@ import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.model.Event;
-import ru.practicum.location.model.Location;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,7 +23,7 @@ public class EventMapper {
                 event.getId(),
                 event.getAnnotation(),
                 toCategoryDto(event.getCategory()),
-                event.getConfirmedRequests(),
+                (long) event.getConfirmedRequests().size(),
                 event.getEventDate().format(FORMATTER),
                 toShortUserDto(event.getInitiator()),
                 event.getPaid(),
@@ -54,8 +53,7 @@ public class EventMapper {
                 eventDto.getDescription(),
                 eventDto.getTitle(),
                 LocalDateTime.parse(eventDto.getEventDate(), FORMATTER),
-                eventDto.getLocation().getLat(),
-                eventDto.getLocation().getLon(),
+                eventDto.getLocation(),
                 eventDto.getPaid(),
                 eventDto.getParticipantLimit(),
                 eventDto.getRequestModeration()
@@ -66,13 +64,13 @@ public class EventMapper {
         return new EventFullDto(
                 event.getAnnotation(),
                 toCategoryDto(event.getCategory()),
-                event.getConfirmedRequests(),
+                (long) event.getConfirmedRequests().size(),
                 event.getPublishedOn().format(FORMATTER),
                 event.getDescription(),
                 event.getEventDate().format(FORMATTER),
                 event.getId(),
                 toShortUserDto(event.getInitiator()),
-                new Location(event.getLat(), event.getLon()),
+                event.getLocation(),
                 event.getPaid(),
                 event.getParticipantLimit(),
                 event.getPublishedOn().format(FORMATTER),

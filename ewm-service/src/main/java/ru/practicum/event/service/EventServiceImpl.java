@@ -202,8 +202,7 @@ public class EventServiceImpl implements EventService {
             event.setDescription(updateEventAdminRequest.getDescription());
         }
         if (updateEventAdminRequest.getLocation() != null) {
-            event.setLat(updateEventAdminRequest.getLocation().getLat());
-            event.setLon(updateEventAdminRequest.getLocation().getLon());
+            event.setLocation(updateEventAdminRequest.getLocation());
         }
         if (updateEventAdminRequest.getPaid() != null) {
             event.setPaid(updateEventAdminRequest.getPaid());

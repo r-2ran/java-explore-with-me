@@ -9,12 +9,15 @@ import ru.practicum.state.State;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllEventsByInitiatorId(Long initiatorId, Pageable pageable);
 
     Event findByIdAndInitiatorId(Long eventId, Long initiatorId);
+
+    Optional<Event> findByCategoryId(Long catId);
 
     @Query("select e from Event e " +
             "where e.initiator.id in ?1 " +

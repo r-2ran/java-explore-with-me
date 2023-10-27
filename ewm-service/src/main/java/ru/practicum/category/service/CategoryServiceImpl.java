@@ -8,7 +8,9 @@ import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
+import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.AlreadyExistException;
+import ru.practicum.exception.ConflictRequestParamException;
 import ru.practicum.exception.NotFoundException;
 
 import java.util.List;
@@ -19,6 +21,7 @@ import static ru.practicum.category.mapper.CategoryMapper.*;
 @AllArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
 
     @Override
     public CategoryDto addCategory(NewCategoryDto categoryDto) {
@@ -56,7 +59,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteCategory(Long categoryId) {
-        checkCategory(categoryId);
+        if (eventRepository.findByCategoryId(categoryId).isEmpty()) {
+            throw new ConflictRequestParamException(String.format("category have events< cannot delete %d",
+                    categoryId));
+        }
         categoryRepository.deleteById(categoryId);
     }
 

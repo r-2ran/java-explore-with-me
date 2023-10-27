@@ -19,7 +19,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
 
     List<Event> findAllByCategoryId(Long catId);
 
-    List<Event> findAllByIdsIn(Set<Long> ids);
+    List<Event> findAllByIdIn(Set<Long> ids);
 
     @Query("select e from Event e " +
             "where lower(e.annotation) like lower(concat('%', ?1, '%')) or " +

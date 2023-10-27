@@ -45,13 +45,13 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
-        return eventService.updateEventByAdmin(eventId, updateEventAdminRequest);
+        return eventService.updateEventAdmin(eventId, updateEventAdminRequest);
     }
 
     @Override
     public List<EventFullDto> findAllEvents(List<Long> users, List<State> states, List<Long> categories,
                                             LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
-        return eventService.findAllEventsAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+        return eventService.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
     @Override

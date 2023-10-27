@@ -60,7 +60,7 @@ public class ErrorHandler {
                 LocalDateTime.now().format(FORMATTER));
     }
 
-    @ExceptionHandler(Throwable.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleInternalServerError(final Throwable e) {
         return new ApiError(
@@ -89,6 +89,17 @@ public class ErrorHandler {
         return new ApiError(new ArrayList<>(),
                 e.getMessage(),
                 "validation error",
+                "BAD_REQUEST",
+                LocalDateTime.now().format(FORMATTER));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleValidException(final javax.xml.bind.ValidationException e) {
+        return new ApiError(
+                new ArrayList<>(),
+                e.getMessage(),
+                "bad request params",
                 "BAD_REQUEST",
                 LocalDateTime.now().format(FORMATTER));
     }

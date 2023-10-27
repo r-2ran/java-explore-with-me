@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.event.dto.*;
 import ru.practicum.state.State;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Service
@@ -13,13 +14,13 @@ public interface EventService {
 
     List<EventShortDto> getAllByUser(Long userId, Integer from, Integer size);
 
-    EventFullDto getById(Long eventId);
+    EventFullDto getById(Long eventId, HttpServletRequest request);
 
     EventFullDto getByUserAndEvent(Long userId, Long eventId);
 
     List<EventShortDto> findAllEvents(String text, List<Long> categories, Boolean paid,
                                       String rangeStart, String rangeEnd, Boolean onlyAvailable,
-                                      String sort, int from, int size);
+                                      String sort, int from, int size, HttpServletRequest request);
 
     List<EventFullDto> findAllEventsAdmin(List<Long> users, List<State> states, List<Long> categories,
                                           String rangeStart, String rangeEnd, int from, int size);
@@ -29,8 +30,6 @@ public interface EventService {
     EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateEventUserRequest);
 
     EventFullDto cancelEvent(Long userId, Long eventId);
-
-    EventFullDto rejectEvent(Long eventId);
 
     EventFullDto confirmEvent(Long eventId);
 

@@ -2,14 +2,11 @@ package ru.practicum.event.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.EndpointHitDto;
-import ru.practicum.StatsClient;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.service.EventService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -17,7 +14,6 @@ import java.util.List;
 @RequestMapping("/events")
 public class EventController {
     private final EventService eventService;
-    private final StatsClient client;
 
     @GetMapping
     List<EventShortDto> findEvents(@RequestParam(required = false) String text,
@@ -30,23 +26,12 @@ public class EventController {
                                    @RequestParam(required = false, defaultValue = "0") int from,
                                    @RequestParam(required = false, defaultValue = "10") int size,
                                    HttpServletRequest request) {
-        addEndpointHit(request);
         return eventService.findAllEvents(text, categories, paid, rangeStart,
-                rangeEnd, onlyAvailable, sort, from, size);
+                rangeEnd, onlyAvailable, sort, from, size, request);
     }
 
     @GetMapping("/{id}")
     public EventFullDto getEventById(@PathVariable Long id, HttpServletRequest request) {
-        addEndpointHit(request);
-        return eventService.getById(id);
-    }
-
-    private void addEndpointHit(HttpServletRequest request) {
-        client.addEndpointHit(new EndpointHitDto(
-                "ewm-service",
-                request.getRequestURI(),
-                request.getRemoteAddr(),
-                LocalDateTime.now())
-        );
+        return eventService.getById(id, request);
     }
 }

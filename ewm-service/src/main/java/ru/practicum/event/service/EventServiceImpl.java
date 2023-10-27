@@ -3,31 +3,33 @@ package ru.practicum.event.service;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import ru.practicum.EndpointHitDto;
+import ru.practicum.StatsClient;
 import ru.practicum.category.model.Category;
+import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.category.service.CategoryService;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.AccessDeniedException;
+import ru.practicum.exception.ConflictRequestParamException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
-import ru.practicum.location.model.Location;
 import ru.practicum.location.service.LocationService;
+import ru.practicum.state.SortState;
 import ru.practicum.state.State;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.practicum.event.mapper.EventMapper.*;
 import static ru.practicum.category.mapper.CategoryMapper.*;
-import static ru.practicum.location.mapper.LocationMapper.*;
 
 @Service
 @AllArgsConstructor
@@ -36,21 +38,27 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryService categoryService;
     private final LocationService locationService;
+    private final CategoryRepository categoryRepository;
+    private final StatsClient client;
 
 
     @Override
     public EventFullDto addEvent(Long userId, NewEventDto eventDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format("no user id %d", userId)));
-        if (eventDto.getEventDate() != null &&
-                LocalDateTime.parse(eventDto.getEventDate(), FORMATTER)
-                        .isBefore(LocalDateTime.now().plusHours(5))) {
-            throw new ValidationException("wrong event date, it cannot be in past");
+        if (LocalDateTime.parse(eventDto.getEventDate(), FORMATTER).isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new ConflictRequestParamException("error date, event cannot be in past");
         }
-        Category category = toCategory(categoryService.getCategoryById(eventDto.getCategory()));
-        Location location = locationService.addLocation(toLocationDto(eventDto.getLocation()));
-        Event event = to(eventDto);
-        event.setState(State.PENDING);
+        Event event = Event.builder()
+                .annotation(eventDto.getAnnotation())
+                .description(eventDto.getDescription())
+                .title(eventDto.getTitle())
+                .initiator(checkUser(userId))
+                .category(toCategory(categoryService.getCategoryById(eventDto.getCategory())))
+                .location(locationService.getByParam(eventDto.getLocation().getLon(), eventDto.getLocation().getLat()))
+                .created(LocalDateTime.now())
+                .eventDate(LocalDateTime.parse(eventDto.getEventDate(), FORMATTER))
+                .views(0)
+                .state(State.PENDING)
+                .build();
         if (eventDto.getRequestModeration() == null) {
             event.setRequestModeration(true);
         } else {
@@ -78,8 +86,12 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto getById(Long eventId) {
-        return toFull(checkEvent(eventId));
+    public EventFullDto getById(Long eventId, HttpServletRequest request) {
+        Event event = checkEvent(eventId);
+        if (event.getState() != State.PUBLISHED) {
+            throw new NotFoundException(String.format("event id %d don't exist", eventId));
+        }
+        return toFull(eventRepository.save(event));
     }
 
     @Override
@@ -92,69 +104,97 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> findAllEvents(String text, List<Long> categories, Boolean paid, String rangeStart,
                                              String rangeEnd, Boolean onlyAvailable, String sort, int from,
-                                             int size) {
+                                             int size, HttpServletRequest request) {
+        Pageable pageable = PageRequest.of(from / size, size);
         LocalDateTime start = LocalDateTime.now();
-        LocalDateTime end = LocalDateTime.now().plusDays(1);
-        from = from / size;
-        Pageable pageable = PageRequest.of(from, size);
-        List<Event> events;
-
         if (rangeStart != null) {
             start = LocalDateTime.parse(rangeStart, FORMATTER);
         }
-        if (rangeEnd != null) {
-            end = LocalDateTime.parse(rangeEnd, FORMATTER);
-        }
-        if (categories == null) {
-            categories = new ArrayList<>();
-        }
-        if (text == null) {
-            events = eventRepository.findEventsWithoutText(categories, paid, start, end, onlyAvailable, pageable);
-        } else {
-            events = eventRepository.findEvents(text, categories, paid, start, end, onlyAvailable, pageable);
-        }
-
-        if (Objects.equals(sort, "EVENT_DATE")) {
-            events = events
-                    .stream()
-                    .sorted(Comparator.comparing(Event::getEventDate).reversed())
+        LocalDateTime end = LocalDateTime.parse(rangeEnd, FORMATTER);
+        checkDate(start, end);
+        List<Specification<Event>> specifications = new ArrayList<>();
+        if (categories != null) {
+            List<Category> categoryList = categories.stream()
+                    .map(id -> categoryRepository.findById(id)
+                            .orElse(null))
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
+            specifications.add(categoryIdIn(categoryList));
         }
+        specifications.add(paid == null ? null : paidIs(paid));
+        specifications.add(eventDateIsGreaterOrEqual(start));
+        specifications.add(rangeEnd == null ? null : eventDateIsLess(end));
+        specifications.add(stateIn(List.of(State.PUBLISHED)));
+        Specification<Event> specification = specifications.stream()
+                .filter(Objects::nonNull)
+                .reduce(Specification::and)
+                .orElseThrow();
+        List<Event> events;
+        if (text == null) {
+            events = eventRepository.findAll(specification, pageable).stream().collect(Collectors.toList());
+        } else {
+            events = new ArrayList<>(eventRepository.findAllByText(text, specification, pageable));
+        }
+        if (sort != null) {
+            SortState state = SortState.valueOf(sort);
+            switch (state) {
+                case EVENT_DATE:
+                    events.sort(Comparator.comparing(Event::getEventDate));
+                    break;
+                case VIEWS:
+                    events.sort(Comparator.comparing(Event::getViews));
+                    break;
+                default:
+                    throw new ValidationException("UNSUPPORTED SORT STATE");
+            }
+        }
+        if (onlyAvailable) {
+            addHit(request);
+            return toShortEventDtoList(events);
+        }
+        addHit(request);
         return toShortEventDtoList(events);
     }
 
     @Override
     public List<EventFullDto> findAllEventsAdmin(List<Long> users, List<State> states, List<Long> categories,
                                                  String rangeStart, String rangeEnd, int from, int size) {
-        LocalDateTime start = LocalDateTime.now();
-        LocalDateTime end = LocalDateTime.now();
-
-        if (rangeStart != null) {
-            start = LocalDateTime.parse(rangeStart, FORMATTER);
+        LocalDateTime start = LocalDateTime.parse(rangeStart);
+        LocalDateTime end = LocalDateTime.parse(rangeEnd);
+        checkDate(start, end);
+        Pageable pageable = PageRequest.of(from / size, size);
+        List<Specification<Event>> specifications = new ArrayList<>();
+        if (users != null) {
+            List<User> userList = users.stream()
+                    .map(id -> userRepository.findById(id)
+                            .orElse(null))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            specifications.add(initiatorIdIn(userList));
         }
-
-        if (rangeEnd != null) {
-            end = LocalDateTime.parse(rangeEnd, FORMATTER);
+        if (categories != null) {
+            List<Category> categoryList = categories.stream()
+                    .map(id -> categoryRepository.findById(id)
+                            .orElse(null))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            specifications.add(categoryIdIn(categoryList));
         }
-
-        if (users == null) {
-            users = new ArrayList<>();
+        specifications.add(states == null ? null : stateIn(states));
+        specifications.add(start == null ? null : eventDateIsGreaterOrEqual(start));
+        specifications.add(end == null ? null : eventDateIsLess(end));
+        Specification<Event> specification = specifications.stream()
+                .filter(Objects::nonNull)
+                .reduce(Specification::and)
+                .orElse(null);
+        List<Event> events;
+        if (specification != null) {
+            events = eventRepository.findAll(specification, pageable).toList();
+        } else {
+            events = eventRepository.findAll(pageable).toList();
         }
-
-        if (states == null) {
-            states = new ArrayList<>();
-            states.add(State.PENDING);
-            states.add(State.CANCELED);
-            states.add(State.PUBLISHED);
-        }
-
-        if (categories == null) {
-            categories = new ArrayList<>();
-        }
-        from = from / size;
-        Pageable pageable = PageRequest.of(from, size);
-        List<Event> events = eventRepository.adminFindEvents(users, states, categories, start, end, pageable);
         return toFullEventDtoList(events);
+
     }
 
     @Override
@@ -228,13 +268,6 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto rejectEvent(Long eventId) {
-        Event event = checkEvent(eventId);
-        event.setState(State.CANCELED);
-        return toFull(eventRepository.save(event));
-    }
-
-    @Override
     public EventFullDto confirmEvent(Long eventId) {
         Event event = checkEvent(eventId);
         event.setState(State.PUBLISHED);
@@ -251,5 +284,43 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(String.format("no such user id = %d", eventId))
                 );
+    }
+
+    private void checkDate(LocalDateTime start, LocalDateTime end) {
+        if (end != null && start.isAfter(end)) {
+            throw new ValidationException("start date cannot be after end date");
+        }
+    }
+
+    private Specification<Event> initiatorIdIn(List<User> users) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.in(root.get("initiator")).value(users);
+    }
+
+    private Specification<Event> stateIn(List<State> states) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.in(root.get("state")).value(states);
+    }
+
+    private Specification<Event> categoryIdIn(List<Category> categories) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.in(root.get("category")).value(categories);
+    }
+
+    private Specification<Event> eventDateIsGreaterOrEqual(LocalDateTime rangeStart) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("eventDate"), rangeStart);
+    }
+
+    private Specification<Event> eventDateIsLess(LocalDateTime rangeEnd) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThan(root.get("eventDate"), rangeEnd);
+    }
+
+    private Specification<Event> paidIs(Boolean paid) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("paid"), paid);
+    }
+
+    private void addHit(HttpServletRequest request) {
+        client.addEndpointHit(new EndpointHitDto(
+                "ewm-main-service",
+                request.getRequestURI(),
+                request.getRemoteAddr(),
+                LocalDateTime.now()));
     }
 }

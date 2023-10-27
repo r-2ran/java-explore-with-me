@@ -59,7 +59,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteCategory(Long categoryId) {
-        if (eventRepository.findByCategoryId(categoryId).isEmpty()) {
+        if (!eventRepository.findAllByCategoryId(categoryId).isEmpty()) {
             throw new ConflictRequestParamException(String.format("category have events< cannot delete %d",
                     categoryId));
         }

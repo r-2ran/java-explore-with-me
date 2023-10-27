@@ -9,4 +9,6 @@ public interface LocationService {
     void deleteById(Long locationId);
 
     Location addLocation(LocationDto locationDto);
+
+    Location getByParam(Float lon, Float lat);
 }

@@ -13,6 +13,7 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "compilations")
+@Builder
 public class Compilation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,9 +29,8 @@ public class Compilation {
     @ToString.Exclude
     Set<Event> events;
 
-    public Compilation(String title, Boolean pinned) {
+    public Compilation(String title) {
         this.title = title;
-        this.pinned = pinned;
     }
 
 }

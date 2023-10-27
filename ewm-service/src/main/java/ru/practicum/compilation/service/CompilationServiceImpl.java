@@ -26,22 +26,28 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto addCompilation(NewCompilationDto compilationDto) {
         Compilation compilation = to(compilationDto);
-        compilation.setEvents(new HashSet<>(eventRepository.findAllById(compilationDto.getEvents())));
+        if (compilationDto.getPinned() == null) {
+            compilation.setPinned(false);
+        }
+        if (compilationDto.getEvents() == null) {
+            compilation.setEvents(new HashSet<>());
+        } else {
+            compilation.setEvents(eventRepository.findAllByIdsIn(compilationDto.getEvents()));
+        }
         return toDto(compilationRepository.save(compilation));
     }
 
     @Override
     public CompilationDto updateCompilation(Long compilationId, UpdateCompilationRequest compilationDto) {
         Compilation compilation = checkCompilation(compilationId);
-        if (!compilation.getEvents().isEmpty()) {
-            compilation.setEvents(
-                    new HashSet<>(eventRepository.findAllById(compilationDto.getEvents())));
+        if (compilationDto.getEvents() != null) {
+            compilation.setEvents(eventRepository.findAllByIdsIn(compilationDto.getEvents()));
         }
-        if (compilation.getTitle() != null) {
-            compilation.setTitle(compilation.getTitle());
+        if (compilationDto.getTitle() != null) {
+            compilation.setTitle(compilationDto.getTitle());
         }
-        if (compilation.getPinned() != null) {
-            compilation.setPinned(compilation.getPinned());
+        if (compilationDto.getPinned() != null) {
+            compilation.setPinned(compilationDto.getPinned());
         }
         compilation = compilationRepository.save(compilation);
         return toDto(compilation);
@@ -51,6 +57,9 @@ public class CompilationServiceImpl implements CompilationService {
     public List<CompilationDto> getAll(Boolean pinned, int from, int size) {
         from = from / size;
         Pageable pageable = PageRequest.of(from, size);
+        if (pinned == null) {
+            return toDtoList(compilationRepository.findAll(pageable).getContent());
+        }
         return toDtoList(compilationRepository.findAllByPinned(pinned, pageable).getContent());
     }
 

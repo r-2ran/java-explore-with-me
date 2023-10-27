@@ -23,8 +23,7 @@ public class CompilationMapper {
 
     public static Compilation to(NewCompilationDto compilationDto) {
         return new Compilation(
-                compilationDto.getTitle(),
-                compilationDto.getPinned()
+                compilationDto.getTitle()
         );
     }
 

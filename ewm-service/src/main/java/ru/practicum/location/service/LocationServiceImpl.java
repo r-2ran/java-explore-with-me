@@ -27,4 +27,11 @@ public class LocationServiceImpl implements LocationService {
     public Location addLocation(LocationDto locationDto) {
         return repository.save(toLocation(locationDto));
     }
+
+    @Override
+    public Location getByParam(Float lon, Float lat) {
+        return repository.findByLonAndLat(lon, lat).orElseThrow(
+                () -> new NotFoundException("no such location found")
+        );
+    }
 }

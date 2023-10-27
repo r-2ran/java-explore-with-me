@@ -47,11 +47,14 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ParticipationRequestDto> getAllByUserId(Long userId) {
+        checkUser(userId);
         return toDtoList(requestRepository.findAllByRequesterId(userId));
     }
 
     @Override
     public List<ParticipationRequestDto> getAllByUserAndEvent(Long userId, Long eventId) {
+        checkUser(userId);
+        checkEvent(eventId);
         return toDtoList(requestRepository.findAllByEventIdAndRequesterId(eventId, userId));
     }
 
@@ -88,7 +91,7 @@ public class RequestServiceImpl implements RequestService {
             }
         });
         Integer confirmed = requestRepository
-                .findAllByIdAndStatusEquals(eventId, RequestStatus.CONFIRMED.name()).size();
+                .countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
         if (Objects.equals(confirmed, event.getParticipantLimit())) {
             throw new AccessDeniedException("participation limit reached");
         }

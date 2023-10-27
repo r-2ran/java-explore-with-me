@@ -17,6 +17,11 @@ import ru.practicum.exception.AccessDeniedException;
 import ru.practicum.exception.ConflictRequestParamException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
+import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.request.dto.EventRequestStatusUpdateResult;
+import ru.practicum.request.model.Request;
+import ru.practicum.request.repository.RequestRepository;
+import ru.practicum.state.RequestStatus;
 import ru.practicum.state.SortState;
 import ru.practicum.state.State;
 import ru.practicum.user.model.User;
@@ -29,6 +34,7 @@ import java.util.stream.Collectors;
 
 import static ru.practicum.event.mapper.EventMapper.*;
 import static ru.practicum.category.mapper.CategoryMapper.*;
+import static ru.practicum.request.mapper.RequestMapper.toDto;
 
 @Service
 @AllArgsConstructor
@@ -38,10 +44,12 @@ public class EventServiceImpl implements EventService {
     private final CategoryService categoryService;
     private final CategoryRepository categoryRepository;
     private final StatsClient client;
+    private final RequestRepository requestRepository;
 
 
     @Override
-    public EventFullDto addEvent(Long userId, NewEventDto eventDto) {
+    public EventFullDto addEventUser(Long userId, NewEventDto eventDto) {
+
         if (LocalDateTime.parse(eventDto.getEventDate(), FORMATTER).isBefore(LocalDateTime.now().plusHours(2))) {
             throw new ConflictRequestParamException("error date, event cannot be in past");
         }
@@ -76,7 +84,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getAllByUser(Long userId, Integer from, Integer size) {
+    public List<EventShortDto> getEventByUserId(Long userId, int from, int size) {
         checkUser(userId);
         from = from / size;
         Pageable pageable = PageRequest.of(from, size);
@@ -84,25 +92,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto getById(Long eventId, HttpServletRequest request) {
-        Event event = checkEvent(eventId);
-        if (event.getState() != State.PUBLISHED) {
-            throw new NotFoundException(String.format("event id %d don't exist", eventId));
-        }
-        return toFull(eventRepository.save(event));
-    }
-
-    @Override
-    public EventFullDto getByUserAndEvent(Long userId, Long eventId) {
-        checkUser(userId);
-        checkEvent(eventId);
-        return toFull(eventRepository.findByIdAndInitiatorId(eventId, userId));
-    }
-
-    @Override
-    public List<EventShortDto> findAllEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
-                                             LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, int from,
-                                             int size, HttpServletRequest request) {
+    public List<EventShortDto> getEventsPublic(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable, SortState sort, int from, int size, HttpServletRequest request) {
         Pageable pageable = PageRequest.of(from / size, size);
         if (rangeStart == null) {
             rangeStart = LocalDateTime.now();
@@ -131,18 +121,15 @@ public class EventServiceImpl implements EventService {
         } else {
             events = new ArrayList<>(eventRepository.findAllByText(text, specification, pageable));
         }
-        if (sort != null) {
-            SortState state = SortState.valueOf(sort);
-            switch (state) {
-                case EVENT_DATE:
-                    events.sort(Comparator.comparing(Event::getEventDate));
-                    break;
-                case VIEWS:
-                    events.sort(Comparator.comparing(Event::getViews));
-                    break;
-                default:
-                    throw new ValidationException("UNSUPPORTED SORT STATE");
-            }
+        switch (sort) {
+            case EVENT_DATE:
+                events.sort(Comparator.comparing(Event::getEventDate));
+                break;
+            case VIEWS:
+                events.sort(Comparator.comparing(Event::getViews));
+                break;
+            default:
+                throw new ValidationException("UNSUPPORTED SORT STATE");
         }
         if (onlyAvailable) {
             addHit(request);
@@ -153,8 +140,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> findAllEventsAdmin(List<Long> users, List<State> states, List<Long> categories,
-                                                 LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
+    public List<EventFullDto> getEventsByAdmin(List<Long> users, List<State> states, List<Long> categories, LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
         checkDate(rangeStart, rangeEnd);
         Pageable pageable = PageRequest.of(from / size, size);
         List<Specification<Event>> specifications = new ArrayList<>();
@@ -188,11 +174,28 @@ public class EventServiceImpl implements EventService {
             events = eventRepository.findAll(pageable).toList();
         }
         return toFullEventDtoList(events);
-
     }
 
     @Override
-    public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequest eventUserRequest) {
+    public EventFullDto getEventByIdPublic(Long eventId, HttpServletRequest request) {
+        Event event = checkEvent(eventId);
+        if (event.getState() != State.PUBLISHED) {
+            throw new NotFoundException(String.format("event id %d don't exist", eventId));
+        }
+        addHit(request);
+        return toFull(eventRepository.save(event));
+    }
+
+    @Override
+    public EventFullDto getEventByUserIdAndEventId(Long userId, Long eventId, HttpServletRequest request) {
+        checkUser(userId);
+        checkEvent(eventId);
+        addHit(request);
+        return toFull(eventRepository.findByIdAndInitiatorId(eventId, userId));
+    }
+
+    @Override
+    public EventFullDto updateEventUser(Long userId, Long eventId, UpdateEventUserRequest eventUserRequest) {
         checkUser(userId);
         Event event = checkEvent(eventId);
         if (event.getState() == State.CANCELED || event.getState() == State.UNSUPPORTED_STATE
@@ -227,7 +230,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
+    public EventFullDto updateEventAdmin(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
         Event event = checkEvent(eventId);
         if (updateEventAdminRequest.getAnnotation() != null) {
             event.setAnnotation(updateEventAdminRequest.getAnnotation());
@@ -254,18 +257,39 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto cancelEvent(Long userId, Long eventId) {
-        checkEvent(eventId);
+    public EventRequestStatusUpdateResult confirmRequest(Long userId, Long eventId,
+                                                         EventRequestStatusUpdateRequest updateRequest) {
         checkUser(userId);
-        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId);
-        return toFull(eventRepository.save(event));
-    }
-
-    @Override
-    public EventFullDto confirmEvent(Long eventId) {
         Event event = checkEvent(eventId);
-        event.setState(State.PUBLISHED);
-        return toFull(eventRepository.save(event));
+        if (event.getParticipantLimit() == 0 || !event.getRequestModeration()) {
+            throw new AccessDeniedException("reached Participant Limit");
+        }
+        List<Request> requests = requestRepository.findAllById(updateRequest.getRequestIds());
+        int limit = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+        if (limit == event.getParticipantLimit()) {
+            throw new AccessDeniedException("reached Participant Limit");
+        }
+        EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult(new ArrayList<>(), new ArrayList<>());
+        for (Request request : requests) {
+            if (request.getStatus() != RequestStatus.PENDING) {
+                throw new AccessDeniedException("status must be PENDING");
+            }
+            if (updateRequest.getStatus().equals(RequestStatus.CONFIRMED.name())) {
+                if (limit < event.getParticipantLimit()) {
+                    request.setStatus(RequestStatus.CONFIRMED);
+                    result.getConfirmedRequests().add(toDto(request));
+                    limit++;
+                } else {
+                    request.setStatus(RequestStatus.REJECTED);
+                    result.getRejectedRequests().add(toDto(request));
+                }
+            } else {
+                request.setStatus(RequestStatus.REJECTED);
+                result.getRejectedRequests().add(toDto(request));
+            }
+        }
+        requestRepository.saveAll(requests);
+        return result;
     }
 
     private User checkUser(Long userId) {
@@ -317,4 +341,5 @@ public class EventServiceImpl implements EventService {
                 request.getRemoteAddr(),
                 LocalDateTime.now()));
     }
+
 }

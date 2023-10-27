@@ -30,7 +30,7 @@ public class AdminController {
 
     @PostMapping("/categories")
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDto addCategory(@RequestBody @Valid NewCategoryDto newCategoryDto) {
+    public CategoryDto addCategory(@Valid @RequestBody NewCategoryDto newCategoryDto) {
         return adminService.addCategory(newCategoryDto);
     }
 
@@ -42,7 +42,7 @@ public class AdminController {
 
     @PatchMapping("/categories/{catId}")
     public CategoryDto updateCategory(@PathVariable Long catId,
-                                      @RequestBody @Valid NewCategoryDto newCategoryDto) {
+                                      @Valid @RequestBody NewCategoryDto newCategoryDto) {
         return adminService.updateCategory(catId, newCategoryDto);
     }
 
@@ -84,7 +84,7 @@ public class AdminController {
 
     @PostMapping("/users")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public UserDto addUser(@RequestBody @Valid NewUserRequest newUserRequest) {
+    public UserDto addUser(@Valid @RequestBody NewUserRequest newUserRequest) {
         return adminService.addUser(newUserRequest);
     }
 
@@ -96,7 +96,7 @@ public class AdminController {
 
     @PostMapping("/compilations")
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto addCompilation(@RequestBody @Valid NewCompilationDto newCompilationDto) {
+    public CompilationDto addCompilation(@Valid @RequestBody NewCompilationDto newCompilationDto) {
         return adminService.addCompilation(newCompilationDto);
     }
 
@@ -108,7 +108,7 @@ public class AdminController {
 
     @PatchMapping("/compilations/{compId}")
     public CompilationDto updateCompilation(@PathVariable Long compId,
-                                            @RequestBody UpdateCompilationRequest compilationRequest) {
+                                            @Valid @RequestBody UpdateCompilationRequest compilationRequest) {
         return adminService.updateCompilation(compId, compilationRequest);
     }
 }

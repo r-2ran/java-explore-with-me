@@ -23,7 +23,6 @@ public interface AdminService {
 
     void deleteCategory(Long catId);
 
-
     EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest updateEventAdminRequest);
 
     List<EventFullDto> findAllEvents(List<Long> users, List<State> states, List<Long> categories,

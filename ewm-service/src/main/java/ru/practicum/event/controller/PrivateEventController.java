@@ -13,6 +13,7 @@ import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.service.RequestService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -29,13 +30,14 @@ public class PrivateEventController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto addEvent(@PathVariable Long userId,
                                  @Valid @RequestBody NewEventDto eventDto) {
-        return eventService.addEvent(userId, eventDto);
+        return eventService.addEventUser(userId, eventDto);
     }
 
     @GetMapping("/{eventId}")
     public EventFullDto getByUserAndEvent(@PathVariable Long userId,
-                                          @PathVariable Long eventId) {
-        return eventService.getByUserAndEvent(userId, eventId);
+                                          @PathVariable Long eventId,
+                                          HttpServletRequest request) {
+        return eventService.getEventByUserIdAndEventId(userId, eventId, request);
     }
 
     @GetMapping
@@ -46,14 +48,14 @@ public class PrivateEventController {
                                             @Positive
                                             @RequestParam(value = "size", defaultValue = "10",
                                                     required = false) Integer size) {
-        return eventService.getAllByUser(userId, from, size);
+        return eventService.getEventByUserId(userId, from, size);
     }
 
     @PatchMapping("/{eventId}")
     public EventFullDto changeEventByUser(@PathVariable Long userId,
                                           @PathVariable Long eventId,
                                           @Valid @RequestBody UpdateEventUserRequest eventUserRequest) {
-        return eventService.updateEventByUser(userId, eventId, eventUserRequest);
+        return eventService.updateEventUser(userId, eventId, eventUserRequest);
     }
 
     @GetMapping("/{eventId}/requests")
@@ -65,7 +67,7 @@ public class PrivateEventController {
     @PatchMapping("/{eventId}/requests")
     public EventRequestStatusUpdateResult updateRequest(@PathVariable Long userId,
                                                         @PathVariable Long eventId,
-                                                        @RequestBody
+                                                        @Valid @RequestBody
                                                         EventRequestStatusUpdateRequest request) {
         return requestService.updateRequest(request, eventId, userId);
     }

@@ -2,6 +2,9 @@ package ru.practicum.event.service;
 
 import org.springframework.stereotype.Service;
 import ru.practicum.event.dto.*;
+import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.request.dto.EventRequestStatusUpdateResult;
+import ru.practicum.state.SortState;
 import ru.practicum.state.State;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,28 +13,29 @@ import java.util.List;
 
 @Service
 public interface EventService {
+    EventFullDto addEventUser(Long userId, NewEventDto dto);
 
-    EventFullDto addEvent(Long userId, NewEventDto eventDto);
+    List<EventShortDto> getEventByUserId(Long userId, int from, int size);
 
-    List<EventShortDto> getAllByUser(Long userId, Integer from, Integer size);
+    List<EventShortDto> getEventsPublic(String text, List<Long> categories,
+                                        Boolean paid, LocalDateTime rangeStart,
+                                        LocalDateTime rangeEnd, Boolean onlyAvailable,
+                                        SortState sort, int from, int size,
+                                        HttpServletRequest request);
 
-    EventFullDto getById(Long eventId, HttpServletRequest request);
+    List<EventFullDto> getEventsByAdmin(List<Long> users, List<State> states,
+                                        List<Long> categories, LocalDateTime rangeStart,
+                                        LocalDateTime rangeEnd, int from, int size);
 
-    EventFullDto getByUserAndEvent(Long userId, Long eventId);
+    EventFullDto getEventByIdPublic(Long eventId, HttpServletRequest request);
 
-    List<EventShortDto> findAllEvents(String text, List<Long> categories, Boolean paid,
-                                      LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable,
-                                      String sort, int from, int size, HttpServletRequest request);
 
-    List<EventFullDto> findAllEventsAdmin(List<Long> users, List<State> states, List<Long> categories,
-                                          LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size);
+    EventFullDto getEventByUserIdAndEventId(Long userId, Long eventId, HttpServletRequest request);
 
-    EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest);
+    EventFullDto updateEventUser(Long userId, Long eventId, UpdateEventUserRequest dto);
 
-    EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateEventUserRequest);
 
-    EventFullDto cancelEvent(Long userId, Long eventId);
+    EventFullDto updateEventAdmin(Long eventId, UpdateEventAdminRequest updateEventAdminRequest);
 
-    EventFullDto confirmEvent(Long eventId);
-
+    EventRequestStatusUpdateResult confirmRequest(Long userId, Long eventId, EventRequestStatusUpdateRequest updateRequest);
 }

@@ -1,5 +1,6 @@
 package ru.practicum.exception;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -84,7 +85,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError handleValidationException(final javax.validation.ValidationException e) {
+    public ApiError handleValidationException(final ConstraintViolationException e) {
         return new ApiError(new ArrayList<>(),
                 e.getMessage(),
                 "validation error",

@@ -16,9 +16,9 @@ public class CompilationController {
     private final CompilationService compilationService;
 
     @GetMapping
-    List<CompilationDto> getAll(@RequestParam(required = false) Boolean pinned,
-                                @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from,
-                                @Positive  @RequestParam(required = false, defaultValue = "10") int size) {
+    List<CompilationDto> getAll(@RequestParam(value = "pinned", required = false) Boolean pinned,
+                                @PositiveOrZero @RequestParam(value = "from", defaultValue = "0", required = false) int from,
+                                @Positive @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
         return compilationService.getAll(pinned, from, size);
     }
 
@@ -26,5 +26,4 @@ public class CompilationController {
     CompilationDto getById(@PathVariable Long compId) {
         return compilationService.getById(compId);
     }
-
 }

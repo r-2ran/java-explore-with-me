@@ -28,47 +28,42 @@ public class PrivateEventController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EventFullDto addEvent(@PathVariable Long userId,
+    public EventFullDto addEvent(@Positive @PathVariable Long userId,
                                  @Valid @RequestBody NewEventDto eventDto) {
         return eventService.addEventUser(userId, eventDto);
     }
 
     @GetMapping("/{eventId}")
-    public EventFullDto getByUserAndEvent(@PathVariable Long userId,
-                                          @PathVariable Long eventId,
+    public EventFullDto getByUserAndEvent(@Positive @PathVariable Long userId,
+                                          @Positive @PathVariable Long eventId,
                                           HttpServletRequest request) {
         return eventService.getEventByUserIdAndEventId(userId, eventId, request);
     }
 
     @GetMapping
-    public List<EventShortDto> getAllByUser(@PathVariable Long userId,
-                                            @PositiveOrZero
-                                            @RequestParam(value = "from", defaultValue = "0",
-                                                    required = false) Integer from,
-                                            @Positive
-                                            @RequestParam(value = "size", defaultValue = "10",
-                                                    required = false) Integer size) {
+    public List<EventShortDto> getAllByUser(@Positive @PathVariable Long userId,
+                                            @PositiveOrZero @RequestParam(value = "from", defaultValue = "0", required = false) int from,
+                                            @Positive @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
         return eventService.getEventByUserId(userId, from, size);
     }
 
     @PatchMapping("/{eventId}")
-    public EventFullDto changeEventByUser(@PathVariable Long userId,
-                                          @PathVariable Long eventId,
+    public EventFullDto changeEventByUser(@Positive @PathVariable Long userId,
+                                          @Positive @PathVariable Long eventId,
                                           @Valid @RequestBody UpdateEventUserRequest eventUserRequest) {
         return eventService.updateEventUser(userId, eventId, eventUserRequest);
     }
 
     @GetMapping("/{eventId}/requests")
-    public List<ParticipationRequestDto> getAllByUserAndEvent(@PathVariable Long userId,
-                                                              @PathVariable Long eventId) {
+    public List<ParticipationRequestDto> getAllByUserAndEvent(@Positive @PathVariable Long userId,
+                                                              @Positive @PathVariable Long eventId) {
         return requestService.getAllByUserAndEvent(userId, eventId);
     }
 
     @PatchMapping("/{eventId}/requests")
-    public EventRequestStatusUpdateResult updateRequest(@PathVariable Long userId,
-                                                        @PathVariable Long eventId,
-                                                        @Valid @RequestBody
-                                                        EventRequestStatusUpdateRequest request) {
+    public EventRequestStatusUpdateResult updateRequest(@Positive @PathVariable Long userId,
+                                                        @Positive @PathVariable Long eventId,
+                                                        @Valid @RequestBody EventRequestStatusUpdateRequest request) {
         return requestService.updateRequest(request, eventId, userId);
     }
 }

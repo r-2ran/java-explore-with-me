@@ -19,16 +19,17 @@ public class EventController {
     private final EventService eventService;
 
     @GetMapping
-    List<EventShortDto> findEvents(@RequestParam(required = false) String text,
-                                   @RequestParam(required = false) List<Long> categories,
-                                   @RequestParam(required = false) Boolean paid,
-                                   @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
-                                   @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-                                   @RequestParam(required = false) Boolean onlyAvailable,
-                                   @RequestParam(required = false) SortState sort,
-                                   @RequestParam(required = false, defaultValue = "0") int from,
-                                   @RequestParam(required = false, defaultValue = "10") int size,
-                                   HttpServletRequest request) {
+    public List<EventShortDto> findEvents(
+            @RequestParam(value = "text", required = false) String text,
+            @RequestParam(value = "categories", required = false) List<Long> categories,
+            @RequestParam(value = "paid", required = false) Boolean paid,
+            @RequestParam(value = "rangeStart", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+            @RequestParam(value = "rangeEnd", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+            @RequestParam(value = "onlyAvailable", defaultValue = "false", required = false) boolean onlyAvailable,
+            @RequestParam(value = "sort", required = false) SortState sort,
+            @RequestParam(value = "from", defaultValue = "0", required = false) int from,
+            @RequestParam(value = "size", defaultValue = "10", required = false) int size,
+            HttpServletRequest request) {
         return eventService.getEventsPublic(text, categories, paid, rangeStart,
                 rangeEnd, onlyAvailable, sort, from, size, request);
     }

@@ -15,21 +15,20 @@ public class RequestController {
     private final RequestService requestService;
 
     @GetMapping
-    public List<ParticipationRequestDto> getAll(@PathVariable Long userId) {
+    public List<ParticipationRequestDto> getAll(@PathVariable(name = "userId") Long userId) {
         return requestService.getAllByUserId(userId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ParticipationRequestDto addRequest(@PathVariable Long userId,
-                                              @RequestParam(value = "eventId",
-                                                      required = false) Long eventId) {
+    public ParticipationRequestDto addRequest(@PathVariable(name = "userId") Long userId,
+                                              @RequestParam(value = "eventId") Long eventId) {
         return requestService.addRequest(userId, eventId);
     }
 
     @PatchMapping("/{requestId}/cancel")
-    public ParticipationRequestDto cancelRequest(@PathVariable Long userId,
-                                                 @PathVariable Long requestId) {
+    public ParticipationRequestDto cancelRequest(@PathVariable(name = "userId") Long userId,
+                                                 @PathVariable(name = "requestId") Long requestId) {
         return requestService.cancelRequest(userId, requestId);
     }
 }

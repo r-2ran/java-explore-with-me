@@ -12,6 +12,7 @@ import ru.practicum.ViewStatsDto;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.event.dto.*;
+import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.AccessDeniedException;
@@ -67,7 +68,7 @@ public class EventServiceImpl implements EventService {
                         .orElseThrow(() -> new NotFoundException(
                                 String.format("category id = %d not found", eventDto.getCategory()))))
                 .location(locationRepository.findByLonAndLat(
-                        eventDto.getLocation().getLon(), eventDto.getLocation().getLat())
+                                eventDto.getLocation().getLon(), eventDto.getLocation().getLat())
                         .orElse(setLocation(eventDto.getLocation())))
                 .created(LocalDateTime.now())
                 .eventDate(eventDto.getEventDate())
@@ -191,7 +192,9 @@ public class EventServiceImpl implements EventService {
         } else {
             events = eventRepository.findAll(pageable).toList();
         }
-        return toFullEventDtoList(events);
+        return events.stream()
+                .map(EventMapper::toFull)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -246,7 +249,7 @@ public class EventServiceImpl implements EventService {
         }
         if (userRequest.getLocation() != null) {
             event.setLocation(locationRepository.findByLonAndLat(
-                    userRequest.getLocation().getLon(), userRequest.getLocation().getLat())
+                            userRequest.getLocation().getLon(), userRequest.getLocation().getLat())
                     .orElse(setLocation(userRequest.getLocation())));
         }
         if (userRequest.getPaid() != null) {
@@ -294,7 +297,7 @@ public class EventServiceImpl implements EventService {
         }
         if (eventAdminRequest.getLocation() != null) {
             event.setLocation(locationRepository.findByLonAndLat(
-                    eventAdminRequest.getLocation().getLon(), eventAdminRequest.getLocation().getLat())
+                            eventAdminRequest.getLocation().getLon(), eventAdminRequest.getLocation().getLat())
                     .orElse(setLocation(eventAdminRequest.getLocation())));
         }
         if (eventAdminRequest.getPaid() != null) {

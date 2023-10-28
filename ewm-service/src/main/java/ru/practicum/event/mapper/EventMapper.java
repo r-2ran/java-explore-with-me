@@ -50,13 +50,13 @@ public class EventMapper {
     public static EventFullDto toFull(Event event) {
         EventFullDto res = EventFullDto.builder()
                 .annotation(event.getAnnotation())
-                .category(toCategoryDto((event.getCategory())))
+                .category(toCategoryDto(event.getCategory()))
                 .createdOn(event.getCreated())
                 .description(event.getDescription())
                 .eventDate(event.getEventDate())
                 .id(event.getId())
                 .initiator(toShortUserDto(event.getInitiator()))
-                .location(toLocationDto(event.getLocation()))
+                .location(toLocationDto((event.getLocation())))
                 .paid(event.getPaid())
                 .participantLimit(event.getParticipantLimit())
                 .requestModeration(event.getRequestModeration())
@@ -70,13 +70,5 @@ public class EventMapper {
             res.setConfirmedRequests(0L);
         }
         return res;
-    }
-
-    public static List<EventFullDto> toFullEventDtoList(List<Event> events) {
-        List<EventFullDto> result = new ArrayList<>();
-        for (Event event : events) {
-            result.add(toFull(event));
-        }
-        return result;
     }
 }

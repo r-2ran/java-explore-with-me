@@ -366,7 +366,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<ParticipationRequestDto> getRequests(Long eventId, Long userId) {
-        checkUser(userId);
         checkEvent(eventId);
         return requestRepository.findAllByEventId(eventId).stream()
                 .map(RequestMapper::toDto)

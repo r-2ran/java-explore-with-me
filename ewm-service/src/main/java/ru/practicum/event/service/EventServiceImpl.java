@@ -365,7 +365,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<ParticipationRequestDto> getRequests(Long eventId, Long userId) {
+    public List<ParticipationRequestDto> getRequests(Long userId, Long eventId) {
         checkEvent(eventId);
         return requestRepository.findAllByEventId(eventId).stream()
                 .map(RequestMapper::toDto)
@@ -380,7 +380,7 @@ public class EventServiceImpl implements EventService {
 
     private Event checkEvent(Long eventId) {
         return eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException(String.format("no such user id = %d", eventId))
+                .orElseThrow(() -> new NotFoundException(String.format("no such event id = %d", eventId))
                 );
     }
 

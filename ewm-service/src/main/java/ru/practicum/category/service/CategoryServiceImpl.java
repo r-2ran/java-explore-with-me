@@ -25,8 +25,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto addCategory(NewCategoryDto categoryDto) {
         try {
-            Category category = (categoryRepository.save(toCategory(categoryDto)));
-            return toCategoryDto(category);
+            return toCategoryDto(categoryRepository.save(toCategory(categoryDto)));
         } catch (Exception e) {
             throw new AccessDeniedException(e.getMessage());
         }
@@ -37,8 +36,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = checkCategory(categoryId);
         category.setName(category.getName());
         try {
-            category = categoryRepository.save(category);
-            return toCategoryDto(category);
+            return toCategoryDto(categoryRepository.save(toCategory(categoryDto)));
         } catch (Exception e) {
             throw new AccessDeniedException(e.getMessage());
         }

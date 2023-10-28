@@ -61,10 +61,13 @@ public class EventServiceImpl implements EventService {
                 .description(eventDto.getDescription())
                 .title(eventDto.getTitle())
                 .initiator(userRepository.findById(userId)
-                        .orElseThrow(() -> new NotFoundException(String.format("user id = %d not found", userId))))
+                        .orElseThrow(() -> new NotFoundException(
+                                String.format("user id = %d not found", userId))))
                 .category(categoryRepository.findById(eventDto.getCategory())
-                        .orElseThrow(() -> new NotFoundException(String.format("category id = %d not found", eventDto.getCategory()))))
-                .location(locationRepository.findByLonAndLat(eventDto.getLocation().getLon(), eventDto.getLocation().getLat())
+                        .orElseThrow(() -> new NotFoundException(
+                                String.format("category id = %d not found", eventDto.getCategory()))))
+                .location(locationRepository.findByLonAndLat(
+                        eventDto.getLocation().getLon(), eventDto.getLocation().getLat())
                         .orElse(setLocation(eventDto.getLocation())))
                 .created(LocalDateTime.now())
                 .eventDate(eventDto.getEventDate())
@@ -97,7 +100,10 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getEventsPublic(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable, SortState sort, int from, int size, HttpServletRequest request) {
+    public List<EventShortDto> getEventsPublic(String text, List<Long> categories, Boolean paid,
+                                               LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                               Boolean onlyAvailable, SortState sort, int from, int size,
+                                               HttpServletRequest request) {
         Pageable pageable = PageRequest.of(from / size, size);
         if (rangeStart == null) {
             rangeStart = LocalDateTime.now();
@@ -141,7 +147,8 @@ public class EventServiceImpl implements EventService {
         if (onlyAvailable) {
             addHit(request);
             return toShortEventDtoList(events.stream()
-                    .filter(event -> (event.getParticipantLimit() > event.getConfirmedRequests().size()) || event.getParticipantLimit() == 0)
+                    .filter(event -> (event.getParticipantLimit() > event.getConfirmedRequests().size())
+                            || event.getParticipantLimit() == 0)
                     .collect(Collectors.toList()));
         }
         addHit(request);
@@ -149,7 +156,9 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> getEventsByAdmin(List<Long> users, List<State> states, List<Long> categories, LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
+    public List<EventFullDto> getEventsByAdmin(List<Long> users, List<State> states, List<Long> categories,
+                                               LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                               int from, int size) {
         checkDate(rangeStart, rangeEnd);
         Pageable pageable = PageRequest.of(from / size, size);
         List<Specification<Event>> specifications = new ArrayList<>();
@@ -229,13 +238,15 @@ public class EventServiceImpl implements EventService {
         }
         if (userRequest.getCategory() != null) {
             event.setCategory(categoryRepository.findById(userRequest.getCategory())
-                    .orElseThrow(() -> new NotFoundException(String.format("category id %d not exist", userRequest.getCategory()))));
+                    .orElseThrow(() -> new NotFoundException(
+                            String.format("category id %d not exist", userRequest.getCategory()))));
         }
         if (userRequest.getDescription() != null) {
             event.setDescription(userRequest.getDescription());
         }
         if (userRequest.getLocation() != null) {
-            event.setLocation(locationRepository.findByLonAndLat(userRequest.getLocation().getLon(), userRequest.getLocation().getLat())
+            event.setLocation(locationRepository.findByLonAndLat(
+                    userRequest.getLocation().getLon(), userRequest.getLocation().getLat())
                     .orElse(setLocation(userRequest.getLocation())));
         }
         if (userRequest.getPaid() != null) {
@@ -278,10 +289,12 @@ public class EventServiceImpl implements EventService {
         }
         if (eventAdminRequest.getCategory() != null) {
             event.setCategory(categoryRepository.findById(eventAdminRequest.getCategory())
-                    .orElseThrow(() -> new NotFoundException(String.format("category id %d not exist", eventAdminRequest.getCategory()))));
+                    .orElseThrow(() -> new NotFoundException(
+                            String.format("category id %d not exist", eventAdminRequest.getCategory()))));
         }
         if (eventAdminRequest.getLocation() != null) {
-            event.setLocation(locationRepository.findByLonAndLat(eventAdminRequest.getLocation().getLon(), eventAdminRequest.getLocation().getLat())
+            event.setLocation(locationRepository.findByLonAndLat(
+                    eventAdminRequest.getLocation().getLon(), eventAdminRequest.getLocation().getLat())
                     .orElse(setLocation(eventAdminRequest.getLocation())));
         }
         if (eventAdminRequest.getPaid() != null) {
@@ -327,7 +340,8 @@ public class EventServiceImpl implements EventService {
         if (limit == event.getParticipantLimit()) {
             throw new AccessDeniedException("participant limit reached");
         }
-        EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult(new ArrayList<>(), new ArrayList<>());
+        EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult(
+                new ArrayList<>(), new ArrayList<>());
         for (Request request : requests) {
             if (request.getStatus() != RequestStatus.PENDING) {
                 throw new AccessDeniedException("must have status PENDING");
@@ -390,7 +404,8 @@ public class EventServiceImpl implements EventService {
     }
 
     private Specification<Event> eventDateIsGreaterOrEqual(LocalDateTime rangeStart) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("eventDate"), rangeStart);
+        return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("eventDate"),
+                rangeStart);
     }
 
     private Specification<Event> eventDateIsLess(LocalDateTime rangeEnd) {

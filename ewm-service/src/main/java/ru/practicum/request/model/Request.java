@@ -22,15 +22,15 @@ public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @Column
-    LocalDateTime created;
     @ManyToOne
     @JoinColumn(name = "event_id")
-    private Event event;
+    Event event;
     @ManyToOne
     @JoinColumn(name = "requester_id")
-    private User requester;
+    User requester;
+    @Column(name = "created")
+    LocalDateTime created;
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private RequestStatus status;
+    RequestStatus status;
 }

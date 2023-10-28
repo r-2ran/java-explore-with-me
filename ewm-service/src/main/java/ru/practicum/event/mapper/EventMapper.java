@@ -2,10 +2,8 @@ package ru.practicum.event.mapper;
 
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.model.Event;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,24 +12,26 @@ import java.util.Set;
 
 import static ru.practicum.category.mapper.CategoryMapper.toCategoryDto;
 import static ru.practicum.user.mapper.UserMapper.toShortUserDto;
+import static ru.practicum.location.mapper.LocationMapper.*;
 
 public class EventMapper {
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static EventShortDto toShortDto(Event event) {
-        return new EventShortDto(
-                event.getId(),
-                event.getAnnotation(),
-                toCategoryDto(event.getCategory()),
-                (long) event.getConfirmedRequests().size(),
-                event.getEventDate().format(FORMATTER),
-                toShortUserDto(event.getInitiator()),
-                event.getPaid(),
-                event.getTitle()
-        );
+        return EventShortDto.builder()
+                .annotation(event.getAnnotation())
+                .category(toCategoryDto(event.getCategory()))
+                .confirmedRequests((long) event.getConfirmedRequests().size())
+                .eventDate(event.getEventDate())
+                .id(event.getId())
+                .initiator(toShortUserDto((event.getInitiator())))
+                .paid(event.getPaid())
+                .title(event.getTitle())
+                .views(event.getViews())
+                .build();
     }
 
-    public static Set<EventShortDto> toShortEventDtoSet(Set<Event> events) {
+    public static Set<EventShortDto> toShortEventDtoSet(List<Event> events) {
         Set<EventShortDto> result = new HashSet<>();
         for (Event event : events) {
             result.add(toShortDto(event));
@@ -47,37 +47,29 @@ public class EventMapper {
         return result;
     }
 
-    public static Event to(NewEventDto eventDto) {
-        return new Event(
-                eventDto.getAnnotation(),
-                eventDto.getDescription(),
-                eventDto.getTitle(),
-                LocalDateTime.parse(eventDto.getEventDate(), FORMATTER),
-                eventDto.getLocation(),
-                eventDto.getPaid(),
-                eventDto.getParticipantLimit(),
-                eventDto.getRequestModeration()
-        );
-    }
-
     public static EventFullDto toFull(Event event) {
-        return new EventFullDto(
-                event.getAnnotation(),
-                toCategoryDto(event.getCategory()),
-                (long) event.getConfirmedRequests().size(),
-                event.getPublishedOn().format(FORMATTER),
-                event.getDescription(),
-                event.getEventDate().format(FORMATTER),
-                event.getId(),
-                toShortUserDto(event.getInitiator()),
-                event.getLocation(),
-                event.getPaid(),
-                event.getParticipantLimit(),
-                event.getPublishedOn().format(FORMATTER),
-                event.getRequestModeration(),
-                event.getState().name(),
-                event.getTitle()
-        );
+        EventFullDto res = EventFullDto.builder()
+                .annotation(event.getAnnotation())
+                .category(toCategoryDto((event.getCategory())))
+                .createdOn(event.getCreated())
+                .description(event.getDescription())
+                .eventDate(event.getEventDate())
+                .id(event.getId())
+                .initiator(toShortUserDto(event.getInitiator()))
+                .location(toLocationDto(event.getLocation()))
+                .paid(event.getPaid())
+                .participantLimit(event.getParticipantLimit())
+                .requestModeration(event.getRequestModeration())
+                .state(event.getState())
+                .title(event.getTitle())
+                .views(event.getViews())
+                .build();
+        if (event.getConfirmedRequests() != null) {
+            res.setConfirmedRequests((long) event.getConfirmedRequests().size());
+        } else {
+            res.setConfirmedRequests(0L);
+        }
+        return res;
     }
 
     public static List<EventFullDto> toFullEventDtoList(List<Event> events) {

@@ -21,13 +21,6 @@ public class CategoryMapper {
         );
     }
 
-    public static Category toCategory(CategoryDto categoryDto) {
-        return new Category(
-                categoryDto.getId(),
-                categoryDto.getName()
-        );
-    }
-
     public static List<CategoryDto> toCategoryDtoList(List<Category> categories) {
         List<CategoryDto> res = new ArrayList<>();
         for (Category category : categories) {

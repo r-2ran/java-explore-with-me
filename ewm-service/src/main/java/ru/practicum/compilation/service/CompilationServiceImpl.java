@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.practicum.compilation.mapper.CompilationMapper;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.dto.UpdateCompilationRequest;
@@ -12,11 +13,11 @@ import ru.practicum.compilation.repository.CompilationRepository;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.NotFoundException;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
 
-import static ru.practicum.compilation.CompilationMapper.*;
+import static ru.practicum.compilation.mapper.CompilationMapper.*;
 
 @Service
 @AllArgsConstructor
@@ -26,15 +27,11 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto addCompilation(NewCompilationDto compilationDto) {
-        Compilation compilation = to(compilationDto);
-        if (compilationDto.getPinned() == null) {
-            compilation.setPinned(false);
-        }
-        if (compilationDto.getEvents() == null) {
-            compilation.setEvents(new HashSet<>());
-        } else {
-            compilation.setEvents(new HashSet<>(eventRepository.findAllByIdIn(compilationDto.getEvents())));
-        }
+        Compilation compilation = Compilation.builder()
+                .events(compilationDto.getEvents() == null ? new ArrayList<>() : eventRepository.findAllByIdIn(compilationDto.getEvents()))
+                .title(compilationDto.getTitle())
+                .pinned(compilationDto.getPinned() != null && compilationDto.getPinned())
+                .build();
         return toDto(compilationRepository.save(compilation));
     }
 
@@ -42,26 +39,28 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto updateCompilation(Long compilationId, UpdateCompilationRequest compilationDto) {
         Compilation compilation = checkCompilation(compilationId);
         if (compilationDto.getEvents() != null) {
-            compilation.setEvents(new HashSet<>(eventRepository.findAllByIdIn(compilationDto.getEvents())));
-        }
-        if (compilationDto.getTitle() != null) {
-            compilation.setTitle(compilationDto.getTitle());
+            compilation.setEvents(eventRepository.findAllByIdIn(compilationDto.getEvents()));
         }
         if (compilationDto.getPinned() != null) {
             compilation.setPinned(compilationDto.getPinned());
         }
-        compilation = compilationRepository.save(compilation);
-        return toDto(compilation);
+        if (compilationDto.getTitle() != null) {
+            compilation.setTitle(compilationDto.getTitle());
+        }
+        return toDto(compilationRepository.save(compilation));
     }
 
     @Override
     public List<CompilationDto> getAll(Boolean pinned, int from, int size) {
-        from = from / size;
-        Pageable pageable = PageRequest.of(from, size);
-        if (Objects.equals(pinned, null)) {
-            return toDtoList(compilationRepository.findAll(pageable).getContent());
+        Pageable pageable = PageRequest.of(from / size, size);
+        if (pinned == null) {
+            return compilationRepository.findAll(pageable).stream()
+                    .map(CompilationMapper::toDto)
+                    .collect(Collectors.toList());
         }
-        return toDtoList(compilationRepository.findAllByPinned(pinned, pageable).getContent());
+        return compilationRepository.findAllByPinned(pinned, pageable).stream()
+                .map(CompilationMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override

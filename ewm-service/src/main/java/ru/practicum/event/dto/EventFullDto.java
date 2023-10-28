@@ -1,67 +1,40 @@
 package ru.practicum.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.category.dto.CategoryDto;
-import ru.practicum.location.model.Location;
+import ru.practicum.location.dto.LocationDto;
+import ru.practicum.state.State;
 import ru.practicum.user.dto.UserShortDto;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 public class EventFullDto {
-    @NotBlank
     String annotation;
-    @NotNull
     CategoryDto category;
     Long confirmedRequests;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    String createdOn;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    LocalDateTime createdOn;
     String description;
-    @NotNull
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    String eventDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    LocalDateTime eventDate;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     Long id;
-    @NotNull
     UserShortDto initiator;
-    @NotNull
-    Location location;
-    @NotNull
+    LocationDto location;
     Boolean paid;
     Integer participantLimit;
-    String publishedOn;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    LocalDateTime publishedOn;
     Boolean requestModeration;
-    String state;
-    @NotNull
+    State state;
     String title;
-    Long views;
-
-    public EventFullDto(String annotation, CategoryDto category, Long confirmedRequests, String createdOn,
-                        String description, String eventDate, Long id, UserShortDto initiator,
-                        Location location, Boolean paid, Integer participantLimit, String publishedOn,
-                        Boolean requestModeration, String state, String title) {
-        this.annotation = annotation;
-        this.category = category;
-        this.confirmedRequests = confirmedRequests;
-        this.createdOn = createdOn;
-        this.description = description;
-        this.eventDate = eventDate;
-        this.id = id;
-        this.initiator = initiator;
-        this.location = location;
-        this.paid = paid;
-        this.participantLimit = participantLimit;
-        this.publishedOn = publishedOn;
-        this.requestModeration = requestModeration;
-        this.state = state;
-        this.title = title;
-    }
+    Integer views;
 }

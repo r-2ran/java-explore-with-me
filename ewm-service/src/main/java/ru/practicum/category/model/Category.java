@@ -18,8 +18,8 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @JoinColumn(name = "name")
-    private String name;
+    @Column(name = "name", nullable = false, unique = true)
+    String name;
 
     public Category(String name) {
         this.name = name;

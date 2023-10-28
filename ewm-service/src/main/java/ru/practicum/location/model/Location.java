@@ -15,9 +15,9 @@ public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @JoinColumn(name = "lat")
+    @Column(name = "lat", nullable = false)
     Float lat;
-    @JoinColumn(name = "lon")
+    @Column(name = "lon", nullable = false)
     Float lon;
 
     public Location(Float lat, Float lon) {

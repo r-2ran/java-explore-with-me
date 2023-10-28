@@ -1,4 +1,4 @@
-drop table if exists users, categories, locations, events, requests, compilations, events_compilations;
+drop table if exists users, categories, locations, events, requests, compilations, events_compilation;
 
 create table if not exists users
 (
@@ -57,7 +57,7 @@ create table if not exists compilations
   title  varchar not null
 );
 
-create table if not exists events_compilations
+create table if not exists events_compilation
 (
   compilation_id bigint references compilations (id) on delete cascade,
   event_id bigint references events (id) on delete cascade,

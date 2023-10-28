@@ -9,8 +9,7 @@ import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.event.repository.EventRepository;
-import ru.practicum.exception.AlreadyExistException;
-import ru.practicum.exception.ConflictRequestParamException;
+import ru.practicum.exception.AccessDeniedException;
 import ru.practicum.exception.NotFoundException;
 
 import java.util.List;
@@ -25,24 +24,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto addCategory(NewCategoryDto categoryDto) {
-        try {
-            return toCategoryDto(categoryRepository.save(toCategory(categoryDto)));
-        } catch (RuntimeException e) {
-            throw new AlreadyExistException(
-                    String.format("category with name %s already exist", categoryDto.getName()));
-        }
+        return toCategoryDto(categoryRepository.save(toCategory(categoryDto)));
     }
 
     @Override
     public CategoryDto updateCategory(Long categoryId, NewCategoryDto categoryDto) {
         Category category = checkCategory(categoryId);
-        category.setName(categoryDto.getName());
-        try {
-            return toCategoryDto(categoryRepository.save(category));
-        } catch (RuntimeException e) {
-            throw new AlreadyExistException(String.format("category %s already exist",
-                    category.getName()));
-        }
+        category.setName(category.getName());
+        return toCategoryDto(categoryRepository.save(category));
     }
 
     @Override
@@ -59,9 +48,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteCategory(Long categoryId) {
+        checkCategory(categoryId);
         if (!eventRepository.findAllByCategoryId(categoryId).isEmpty()) {
-            throw new ConflictRequestParamException(String.format("category have events< cannot delete %d",
-                    categoryId));
+            throw new AccessDeniedException("cannot delete category cause have events");
         }
         categoryRepository.deleteById(categoryId);
     }

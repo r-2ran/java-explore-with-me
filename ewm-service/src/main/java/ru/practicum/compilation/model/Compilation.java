@@ -5,32 +5,26 @@ import lombok.experimental.FieldDefaults;
 import ru.practicum.event.model.Event;
 
 import javax.persistence.*;
-import java.util.Set;
+import java.util.List;
 
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "compilations")
+@Table(name = "compilations", schema = "public")
 @Builder
 public class Compilation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @Column
+    @Column(name = "title", nullable = false)
     String title;
-    @Column
+    @Column(name = "pinned")
     Boolean pinned;
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "events_compilations",
+    @ManyToMany
+    @JoinTable(name = "events_compilation",
             joinColumns = @JoinColumn(name = "compilation_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id"))
-    @ToString.Exclude
-    Set<Event> events;
-
-    public Compilation(String title) {
-        this.title = title;
-    }
-
+    List<Event> events;
 }

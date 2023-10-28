@@ -7,35 +7,36 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.validator.constraints.Length;
-import ru.practicum.location.model.Location;
+import ru.practicum.location.dto.LocationDto;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.*;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NewEventDto {
+    @NotBlank
     @Length(min = 20, max = 2000)
-    @NotBlank
     String annotation;
-    @Positive
-    Long category;
-    @Length(min = 20, max = 7000)
-    @NotBlank
-    String description;
-    @NotBlank
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    String eventDate;
     @NotNull
-    Location location;
+    @PositiveOrZero
+    Long category;
+    @NotBlank
+    @Length(min = 20, max = 7000)
+    String description;
+    @NotNull
+    @Future
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    LocalDateTime eventDate;
+    @NotNull
+    LocationDto location;
     Boolean paid;
+    @PositiveOrZero
     Integer participantLimit;
     Boolean requestModeration;
     @NotBlank
     @Length(min = 3, max = 120)
     String title;
-
 }

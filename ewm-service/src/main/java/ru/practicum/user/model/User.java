@@ -17,11 +17,11 @@ import javax.persistence.*;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @JoinColumn(name = "name")
-    private String name;
-    @JoinColumn(name = "email")
-    private String email;
+    Long id;
+    @Column(name = "name", nullable = false)
+    String name;
+    @Column(name = "email", nullable = false)
+    String email;
 
     public User(String name, String email) {
         this.name = name;

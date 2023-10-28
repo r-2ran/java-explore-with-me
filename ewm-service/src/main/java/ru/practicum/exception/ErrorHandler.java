@@ -61,13 +61,13 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleForbiddenException(final AccessDeniedException e) {
         return new ApiError(
                 List.of(e),
                 e.getMessage(),
                 "you don't have access to these object or data",
-                "FORBIDDEN",
+                "CONFLICT",
                 LocalDateTime.now().format(FORMATTER));
     }
 

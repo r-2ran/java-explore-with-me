@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.event.dto.*;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
+import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.state.SortState;
 import ru.practicum.state.State;
 
@@ -32,10 +33,13 @@ public interface EventService {
 
     EventFullDto getEventByUserIdAndEventId(Long userId, Long eventId, HttpServletRequest request);
 
-    EventFullDto updateEventUser(Long userId, Long eventId, UpdateEventUserRequest dto);
+    EventFullDto updateEventUser(Long userId, Long eventId, UpdateEventUserRequest userRequest);
 
 
-    EventFullDto updateEventAdmin(Long eventId, UpdateEventAdminRequest updateEventAdminRequest);
+    EventFullDto updateEventAdmin(Long eventId, UpdateEventAdminRequest adminRequest);
 
     EventRequestStatusUpdateResult confirmRequest(Long userId, Long eventId, EventRequestStatusUpdateRequest updateRequest);
+
+    List<ParticipationRequestDto> getRequests(Long eventId, Long userId);
+
 }

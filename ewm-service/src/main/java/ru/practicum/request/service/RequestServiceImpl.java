@@ -5,12 +5,13 @@ import org.springframework.stereotype.Service;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.AccessDeniedException;
+import ru.practicum.exception.ConflictRequestParamException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.exception.ValidationException;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.model.Request;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.state.RequestStatus;
+import ru.practicum.state.State;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
@@ -29,16 +30,35 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
-        if (eventId == null) {
-            throw new ValidationException("bad param eventId");
+        Event event = checkEvent(eventId);
+        User user = checkUser(userId);
+        if (Objects.equals(userId, event.getInitiator().getId())) {
+            throw new ConflictRequestParamException("master cannot be initiator");
         }
-        Request request = new Request();
-        request.setRequester(checkUser(userId));
-        request.setEvent(checkEvent(eventId));
-        request.setCreated(LocalDateTime.now());
-        request.setStatus(RequestStatus.PENDING);
-        requestRepository.save(request);
-        return toDto(request);
+        if (!requestRepository.findAllByEventIdAndRequesterId(eventId, userId).isEmpty()) {
+            throw new ConflictRequestParamException(String.format("user %d already in event", userId));
+        }
+        if (event.getState() != State.PUBLISHED) {
+            throw new AccessDeniedException("event is not PUBLISHED");
+        }
+        if (event.getParticipantLimit() <= requestRepository.countByEventIdAndStatus(
+                eventId, RequestStatus.CONFIRMED) && event.getParticipantLimit() != 0) {
+            throw new AccessDeniedException(String.format("event %d reached participant limit", eventId));
+        }
+        Request request = Request.builder()
+                .event(event)
+                .requester(user)
+                .created(LocalDateTime.now())
+                .build();
+        if (event.getParticipantLimit() == 0) {
+            request.setStatus(RequestStatus.CONFIRMED);
+        } else {
+            request.setStatus(RequestStatus.PENDING);
+        }
+        if (!event.getRequestModeration()) {
+            request.setStatus(RequestStatus.CONFIRMED);
+        }
+        return toDto(requestRepository.save(request));
     }
 
     @Override

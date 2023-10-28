@@ -77,7 +77,7 @@ public class ErrorHandler {
         return new ApiError(
                 new ArrayList<>(),
                 e.getMessage(),
-                "server error",
+                e.toString(),
                 "INTERNAL_SERVER_ERROR",
                 LocalDateTime.now().format(FORMATTER));
     }
@@ -95,12 +95,12 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleValidationException(final ConstraintViolationException e) {
         return new ApiError(new ArrayList<>(),
                 e.getMessage(),
                 "validation error",
-                "BAD_REQUEST",
+                "CONFLICT",
                 LocalDateTime.now().format(FORMATTER));
     }
 

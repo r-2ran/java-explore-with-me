@@ -1,4 +1,4 @@
-drop table if exists users, categories, locations, events, requests, compilations, events_compilations
+drop table if exists users, categories, locations, events, requests, compilations, events_compilations;
 
 create table if not exists users
 (

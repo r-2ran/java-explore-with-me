@@ -1,44 +1,62 @@
 package ru.practicum;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import java.util.List;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Service
-public class StatsClient extends BaseClient {
+public class StatsClient {
+    private final RestTemplate restTemplate;
+    private final String statsUri = "http://stats-server:9090";
 
-    @Autowired
-    public StatsClient(@Value("${stats-server.url}") String serverUrl, RestTemplateBuilder builder) {
-        super(builder
-                .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
-                .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                .build()
-        );
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    public StatsClient() {
+        this.restTemplate = new RestTemplate();
     }
 
-    public ResponseEntity<Object> addEndpointHit(EndpointHitDto hitDto) {
-        return post("/hit", new EndpointHitDto(
-                hitDto.getApp(),
-                hitDto.getUri(),
-                hitDto.getIp(),
-                hitDto.getTimestamp()
-        ));
+    public void addEndpointHitDto(EndpointHitDto endpointHitDto) {
+        HttpEntity<EndpointHitDto> httpEntity = new HttpEntity<>(endpointHitDto);
+        restTemplate.exchange(statsUri + "/hit", HttpMethod.POST, httpEntity, Object.class);
     }
 
-    public ResponseEntity<Object> getStats(List<String> uris, boolean unique, String start, String end) {
-        Map<String, Object> parameters = Map.of(
-                "uris", uris,
-                "unique", end,
-                "start", start,
-                "end", end
-        );
-        return get("/stats?start={start}&end={end}&uris={uris}&unique={unique}", parameters);
+    public ResponseEntity<ViewStatsDto[]> getViewStatsDto(LocalDateTime start, LocalDateTime end, String[] uris, boolean unique) {
+        Map<String, Object> params;
+        String path;
+        if (uris == null) {
+            params = Map.of(
+                    "start", start.format(formatter),
+                    "end", end.format(formatter),
+                    "unique", unique
+            );
+            path = statsUri + "/stats?start={strStart}&end={strEnd}&unique={unique}";
+        } else {
+            params = Map.of(
+                    "start", start.format(formatter),
+                    "end", end.format(formatter),
+                    "uris", uris,
+                    "unique", unique
+            );
+            path = statsUri + "/stats?start={start}&end={end}&uris={uris}&unique={unique}";
+        }
+        return prepareGatewayResponse(restTemplate.getForEntity(path, ViewStatsDto[].class, params));
+    }
+
+    private static ResponseEntity<ViewStatsDto[]> prepareGatewayResponse(ResponseEntity<ViewStatsDto[]> response) {
+        if (response.getStatusCode().is2xxSuccessful()) {
+            return response;
+        }
+        ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(response.getStatusCode());
+        if (response.hasBody()) {
+            return responseBuilder.body(response.getBody());
+        }
+        return responseBuilder.build();
     }
 }

@@ -1,7 +1,6 @@
 package ru.practicum.user.service;
 
 import lombok.AllArgsConstructor;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -26,7 +25,7 @@ public class UserServiceImpl implements UserService {
     public UserDto addUser(NewUserRequest newUserRequest) {
         try {
             return toUserDto(userRepository.save(toUser(newUserRequest)));
-        } catch (ConstraintViolationException e) {
+        } catch (Exception e) {
             throw new AccessDeniedException(e.getMessage());
         }
     }

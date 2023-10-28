@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.StatsClient;
+import ru.practicum.ViewStatsDto;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.event.dto.*;
@@ -187,9 +189,14 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventByIdPublic(Long eventId, HttpServletRequest request) {
         Event event = checkEvent(eventId);
         if (event.getState() != State.PUBLISHED) {
-            throw new NotFoundException(String.format("event id %d don't exist", eventId));
+            throw new NotFoundException(String.format("event %d not PUBLISHED", eventId));
         }
+        Integer views = getViews(eventId);
         addHit(request);
+        Integer updatedViews = getViews(eventId);
+        if (views < updatedViews) {
+            event.setViews(event.getViews() + 1);
+        }
         return toFull(eventRepository.save(event));
     }
 
@@ -395,11 +402,27 @@ public class EventServiceImpl implements EventService {
     }
 
     private void addHit(HttpServletRequest request) {
-        client.addEndpointHit(new EndpointHitDto(
+        client.addEndpointHitDto(new EndpointHitDto(
                 "ewm-main-service",
                 request.getRequestURI(),
                 request.getRemoteAddr(),
                 LocalDateTime.now()));
+    }
+
+    private Integer getViews(Long eventId) {
+        ResponseEntity<ViewStatsDto[]> response = client.getViewStatsDto(LocalDateTime.now().minusYears(2),
+                LocalDateTime.now(),
+                new String[]{"/events/" + eventId},
+                true);
+        int views = 0;
+        Optional<ViewStatsDto> stat;
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            stat = Arrays.stream(response.getBody()).findFirst();
+            if (stat.isPresent()) {
+                views = Math.toIntExact(stat.get().getHits());
+            }
+        }
+        return views;
     }
 
     private Location setLocation(LocationDto locationDto) {

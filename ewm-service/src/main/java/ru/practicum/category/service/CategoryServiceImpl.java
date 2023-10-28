@@ -1,7 +1,6 @@
 package ru.practicum.category.service;
 
 import lombok.AllArgsConstructor;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,8 +25,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto addCategory(NewCategoryDto categoryDto) {
         try {
-            return toCategoryDto(categoryRepository.save(toCategory(categoryDto)));
-        } catch (ConstraintViolationException e) {
+            Category category = (categoryRepository.save(toCategory(categoryDto)));
+            return toCategoryDto(category);
+        } catch (Exception e) {
             throw new AccessDeniedException(e.getMessage());
         }
     }
@@ -37,8 +37,9 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = checkCategory(categoryId);
         category.setName(category.getName());
         try {
-            return toCategoryDto(categoryRepository.save(category));
-        } catch (ConstraintViolationException e) {
+            category = categoryRepository.save(category);
+            return toCategoryDto(category);
+        } catch (Exception e) {
             throw new AccessDeniedException(e.getMessage());
         }
     }

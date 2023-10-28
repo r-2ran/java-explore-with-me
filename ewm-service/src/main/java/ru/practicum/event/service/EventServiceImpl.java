@@ -89,7 +89,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getEventByUserId(Long userId, int from, int size) {
-        checkUser(userId);
         from = from / size;
         Pageable pageable = PageRequest.of(from, size);
         return toShortEventDtoList(eventRepository.findAllEventsByInitiatorId(userId, pageable));
@@ -125,19 +124,23 @@ public class EventServiceImpl implements EventService {
         } else {
             events = new ArrayList<>(eventRepository.findAllByText(text, specification, pageable));
         }
-        switch (sort) {
-            case EVENT_DATE:
-                events.sort(Comparator.comparing(Event::getEventDate));
-                break;
-            case VIEWS:
-                events.sort(Comparator.comparing(Event::getViews));
-                break;
-            default:
-                throw new ValidationException("UNSUPPORTED SORT STATE");
+        if (sort != null) {
+            switch (sort) {
+                case EVENT_DATE:
+                    events.sort(Comparator.comparing(Event::getEventDate));
+                    break;
+                case VIEWS:
+                    events.sort(Comparator.comparing(Event::getViews));
+                    break;
+                default:
+                    throw new ValidationException("UNSUPPORTED SORT");
+            }
         }
         if (onlyAvailable) {
             addHit(request);
-            return toShortEventDtoList(events);
+            return toShortEventDtoList(events.stream()
+                    .filter(event -> (event.getParticipantLimit() > event.getConfirmedRequests().size()) || event.getParticipantLimit() == 0)
+                    .collect(Collectors.toList()));
         }
         addHit(request);
         return toShortEventDtoList(events);
@@ -192,7 +195,6 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventByUserIdAndEventId(Long userId, Long eventId, HttpServletRequest request) {
-        checkUser(userId);
         checkEvent(eventId);
         addHit(request);
         return toFull(eventRepository.findByIdAndInitiatorId(eventId, userId));

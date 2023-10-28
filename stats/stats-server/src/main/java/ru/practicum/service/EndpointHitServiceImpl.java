@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.ViewStatsDto;
+import ru.practicum.exception.WrongDateException;
 import ru.practicum.model.ViewStats;
 import ru.practicum.repository.EndpointHitRepository;
 
@@ -30,7 +31,12 @@ public class EndpointHitServiceImpl implements EndpointHitService {
     public List<ViewStatsDto> getStats(List<String> uris, boolean isUnique,
                                        LocalDateTime start, LocalDateTime end) {
         List<ViewStats> res;
-
+        if (start == null || end == null) {
+            throw new WrongDateException("don't have required param start date oe end date");
+        }
+        if (start.isAfter(end)) {
+            throw new WrongDateException("start cannot be after end");
+        }
         if (isUnique) {
             if (uris == null) {
                 res = repository.findAllUniqueIp(start, end);

@@ -7,6 +7,7 @@ import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.AccessDeniedException;
 import ru.practicum.exception.ConflictRequestParamException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.ValidationException;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.model.Request;
 import ru.practicum.request.repository.RequestRepository;
@@ -30,6 +31,9 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
+        if (eventId == null) {
+            throw new ValidationException("bad eventId param");
+        }
         Event event = checkEvent(eventId);
         User user = checkUser(userId);
         if (Objects.equals(userId, event.getInitiator().getId())) {
@@ -63,7 +67,6 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ParticipationRequestDto> getAllByUserId(Long userId) {
-        checkUser(userId);
         return toDtoList(requestRepository.findAllByRequesterId(userId));
     }
 

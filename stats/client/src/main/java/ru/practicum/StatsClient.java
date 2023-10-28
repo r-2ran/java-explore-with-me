@@ -23,8 +23,8 @@ public class StatsClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> addEndpointHit(EndpointHitDto hitDto) {
-        return post("/hit", new EndpointHitDto(
+    public void addEndpointHit(EndpointHitDto hitDto) {
+        post("/hit", new EndpointHitDto(
                 hitDto.getApp(),
                 hitDto.getUri(),
                 hitDto.getIp(),
@@ -35,7 +35,7 @@ public class StatsClient extends BaseClient {
     public ResponseEntity<Object> getStats(List<String> uris, boolean unique, String start, String end) {
         Map<String, Object> parameters = Map.of(
                 "uris", uris,
-                "unique", end,
+                "unique", unique,
                 "start", start,
                 "end", end
         );

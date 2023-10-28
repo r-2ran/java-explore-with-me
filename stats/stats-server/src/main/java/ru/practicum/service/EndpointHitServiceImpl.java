@@ -9,7 +9,6 @@ import ru.practicum.model.ViewStats;
 import ru.practicum.repository.EndpointHitRepository;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static ru.practicum.mapper.EndpointHitMapper.*;
@@ -29,23 +28,20 @@ public class EndpointHitServiceImpl implements EndpointHitService {
     @Override
     @Transactional
     public List<ViewStatsDto> getStats(List<String> uris, boolean isUnique,
-                                       String start, String end) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime startDate = LocalDateTime.parse(start, formatter);
-        LocalDateTime endDate = LocalDateTime.parse(end, formatter);
+                                       LocalDateTime start, LocalDateTime end) {
         List<ViewStats> res;
 
         if (isUnique) {
             if (uris == null) {
-                res = repository.findAllUniqueIp(startDate, endDate);
+                res = repository.findAllUniqueIp(start, end);
             } else {
-                res = repository.findUniqueIpByUris(startDate, endDate, uris);
+                res = repository.findUniqueIpByUris(start, end, uris);
             }
         } else {
             if (uris == null) {
-                res = repository.findAllNotUniqueIp(startDate, endDate);
+                res = repository.findAllNotUniqueIp(start, end);
             } else {
-                res = repository.findNotUniqueIpByUris(startDate, endDate, uris);
+                res = repository.findNotUniqueIpByUris(start, end, uris);
             }
         }
         return toDtos(res);

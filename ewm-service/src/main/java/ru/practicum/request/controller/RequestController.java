@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.service.RequestService;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -25,13 +24,13 @@ public class RequestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto addRequest(@PathVariable(name = "userId") Long userId,
-                                              @NotNull @RequestParam(value = "eventId", required = false) Long eventId) {
+                                              @RequestParam(value = "eventId", required = false) Long eventId) {
         return requestService.addRequest(userId, eventId);
     }
 
     @PatchMapping("/{requestId}/cancel")
     public ParticipationRequestDto cancelRequest(@PathVariable(name = "userId") Long userId,
                                                  @PathVariable(name = "requestId") Long requestId) {
-        return requestService.cancelRequest(userId, requestId);
+        return requestService.cancelRequest(requestId, userId);
     }
 }

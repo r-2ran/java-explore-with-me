@@ -17,15 +17,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminEventController {
     private final EventService eventService;
+    private final String datePattern = "yyyy-MM-dd HH:mm:ss";
 
     @GetMapping
     public List<EventFullDto> getEventsByAdmin(@RequestParam(value = "users", required = false) List<Long> users,
                                                @RequestParam(value = "states", required = false) List<State> states,
                                                @RequestParam(value = "categories", required = false) List<Long> categories,
                                                @RequestParam(value = "rangeStart", required = false)
-                                               @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+                                               @DateTimeFormat(pattern = datePattern) LocalDateTime rangeStart,
                                                @RequestParam(value = "rangeEnd", required = false)
-                                               @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+                                               @DateTimeFormat(pattern = datePattern) LocalDateTime rangeEnd,
                                                @RequestParam(value = "from", defaultValue = "0", required = false) int from,
                                                @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
         return eventService.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, from, size);

@@ -58,7 +58,8 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Long categoryId) {
         checkCategory(categoryId);
         if (!eventRepository.findAllByCategoryId(categoryId).isEmpty()) {
-            throw new AccessDeniedException("cannot delete category cause have events");
+            throw new AccessDeniedException(
+                    String.format("cannot delete Category id = %d cause have events", categoryId));
         }
         categoryRepository.deleteById(categoryId);
     }

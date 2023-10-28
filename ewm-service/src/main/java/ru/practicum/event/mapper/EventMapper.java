@@ -5,10 +5,7 @@ import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.model.Event;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static ru.practicum.category.mapper.CategoryMapper.toCategoryDto;
 import static ru.practicum.user.mapper.UserMapper.toShortUserDto;
@@ -64,7 +61,7 @@ public class EventMapper {
                 .title(event.getTitle())
                 .views(event.getViews())
                 .build();
-        if (event.getConfirmedRequests() != null) {
+        if (!Objects.equals(event.getConfirmedRequests(), null)) {
             res.setConfirmedRequests(event.getConfirmedRequests().size());
         } else {
             res.setConfirmedRequests(0);

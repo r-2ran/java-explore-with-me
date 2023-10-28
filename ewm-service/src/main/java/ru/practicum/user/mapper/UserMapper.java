@@ -15,10 +15,10 @@ public class UserMapper {
     }
 
     public static UserShortDto toShortUserDto(User user) {
-        return new UserShortDto(
-                user.getId(),
-                user.getName()
-        );
+        return UserShortDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .build();
     }
 
     public static User toUser(NewUserRequest newUserRequest) {

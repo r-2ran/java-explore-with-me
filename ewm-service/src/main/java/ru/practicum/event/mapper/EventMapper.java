@@ -21,7 +21,7 @@ public class EventMapper {
         return EventShortDto.builder()
                 .annotation(event.getAnnotation())
                 .category(toCategoryDto(event.getCategory()))
-                .confirmedRequests((long) event.getConfirmedRequests().size())
+                .confirmedRequests(event.getConfirmedRequests().size())
                 .eventDate(event.getEventDate())
                 .id(event.getId())
                 .initiator(toShortUserDto((event.getInitiator())))
@@ -65,9 +65,9 @@ public class EventMapper {
                 .views(event.getViews())
                 .build();
         if (event.getConfirmedRequests() != null) {
-            res.setConfirmedRequests((long) event.getConfirmedRequests().size());
+            res.setConfirmedRequests(event.getConfirmedRequests().size());
         } else {
-            res.setConfirmedRequests(0L);
+            res.setConfirmedRequests(0);
         }
         return res;
     }

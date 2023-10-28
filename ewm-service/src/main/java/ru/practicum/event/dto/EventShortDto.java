@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class EventShortDto {
     String annotation;
     CategoryDto category;
-    Long confirmedRequests;
+    Integer confirmedRequests;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime eventDate;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

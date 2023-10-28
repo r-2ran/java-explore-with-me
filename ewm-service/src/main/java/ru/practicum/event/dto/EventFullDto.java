@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 public class EventFullDto {
     String annotation;
     CategoryDto category;
-    Long confirmedRequests;
+    Integer confirmedRequests;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdOn;
     String description;

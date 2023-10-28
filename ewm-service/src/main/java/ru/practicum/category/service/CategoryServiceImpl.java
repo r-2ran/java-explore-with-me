@@ -34,9 +34,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto updateCategory(Long categoryId, NewCategoryDto categoryDto) {
         Category category = checkCategory(categoryId);
-        category.setName(category.getName());
+        category.setName(categoryDto.getName());
         try {
-            return toCategoryDto(categoryRepository.save(toCategory(categoryDto)));
+            return toCategoryDto(categoryRepository.save(category));
         } catch (Exception e) {
             throw new AccessDeniedException(e.getMessage());
         }

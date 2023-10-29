@@ -2,7 +2,7 @@ package ru.practicum.comment.model;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.practicum.event.dto.EventFullDto;
+import ru.practicum.event.model.Event;
 import ru.practicum.user.model.User;
 
 import javax.persistence.*;
@@ -23,7 +23,7 @@ public class Comment {
     String text;
     @ManyToOne
     @JoinColumn(name = "event_id")
-    EventFullDto event;
+    Event event;
     @ManyToOne
     @JoinColumn(name = "author_id")
     User author;

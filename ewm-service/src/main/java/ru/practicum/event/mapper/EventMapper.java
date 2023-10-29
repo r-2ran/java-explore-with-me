@@ -28,6 +28,20 @@ public class EventMapper {
                 .build();
     }
 
+    public static EventShortDto toFullDto(EventFullDto event) {
+        return EventShortDto.builder()
+                .annotation(event.getAnnotation())
+                .category(event.getCategory())
+                .confirmedRequests(event.getConfirmedRequests())
+                .eventDate(event.getEventDate())
+                .id(event.getId())
+                .initiator(event.getInitiator())
+                .paid(event.getPaid())
+                .title(event.getTitle())
+                .views(event.getViews())
+                .build();
+    }
+
     public static Set<EventShortDto> toShortEventDtoSet(List<Event> events) {
         Set<EventShortDto> result = new HashSet<>();
         for (Event event : events) {

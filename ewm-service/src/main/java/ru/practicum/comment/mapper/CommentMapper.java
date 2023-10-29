@@ -12,7 +12,7 @@ public class CommentMapper {
         return CommentDto.builder()
                 .text(comment.getText())
                 .isEdited(comment.getIsEdited())
-                .event(toFullDto(comment.getEvent()))
+                .event(toShortDto(comment.getEvent()))
                 .author(toShortUserDto(comment.getAuthor()))
                 .created(comment.getCreated())
                 .build();

@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ru.practicum.comment.mapper.CommentMapper.*;
-import static ru.practicum.event.mapper.EventMapper.toFull;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +33,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = Comment.builder()
                 .text(commentDto.getText())
                 .author(checkUser(userId))
-                .event(toFull(checkEvent(eventId)))
+                .event(checkEvent(eventId))
                 .isEdited(false)
                 .created(LocalDateTime.now())
                 .status(CommentStatus.PENDING)

@@ -191,14 +191,15 @@
 					}
 				],
 				"url": {
-					"raw": "{{baseUrl}}/events/:eventId/comments",
+					"raw": "{{baseUrl}}/events/:eventId/comments/event",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"events",
 						":eventId",
-						"comments"
+						"comments",
+						"event"
 					],
 					"variable": [
 						{
@@ -235,14 +236,15 @@
 					}
 				],
 				"url": {
-					"raw": "{{baseUrl}}/events/:eventId/comments",
+					"raw": "{{baseUrl}}/events/:eventId/comments/event",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"events",
 						":eventId",
-						"comments"
+						"comments",
+						"event"
 					],
 					"variable": [
 						{
@@ -279,14 +281,15 @@
 					}
 				],
 				"url": {
-					"raw": "{{baseUrl}}/events/:eventId/comments",
+					"raw": "{{baseUrl}}/events/:eventId/comments/user",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"events",
 						":eventId",
-						"comments"
+						"comments",
+						"user"
 					],
 					"variable": [
 						{

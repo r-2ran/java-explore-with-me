@@ -17,6 +17,7 @@ import java.util.List;
 public class CommentController {
     private final CommentService commentService;
     private static final String USER_ID = "User-Id";
+    private static final String ID = "/{commentId}";
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -42,13 +43,13 @@ public class CommentController {
         return commentService.getAllByAuthorId(userId);
     }
 
-    @PatchMapping("/{commentId}")
+    @PatchMapping(ID)
     CommentDto updateComment(@PathVariable(name = "commentId") Long commentId,
                              @Valid @RequestBody UpdatedComment comment) {
         return commentService.updateComment(commentId, comment);
     }
 
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping(ID)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteCommentById(@PathVariable(name = "commentId") Long commentId) {
         commentService.deleteCommentById(commentId);

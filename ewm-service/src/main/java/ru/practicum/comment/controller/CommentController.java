@@ -32,12 +32,12 @@ public class CommentController {
         return commentService.getCommentByEventAndAuthor(eventId, userId);
     }
 
-    @GetMapping
+    @GetMapping("/event")
     List<CommentDto> getAllByEvent(@PathVariable Long eventId) {
         return commentService.getAllByEvent(eventId);
     }
 
-    @GetMapping
+    @GetMapping("/user")
     List<CommentDto> getAllByAuthorId(@RequestHeader(name = USER_ID) Long userId) {
         return commentService.getAllByAuthorId(userId);
     }
